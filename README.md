@@ -139,7 +139,7 @@ Many thanks to Emilian Bold who converted the ancient history to his
 and made the magic possible!
 </details>
 
-#### This is a work in progress the code is experimental and subject to frequent changes
+**This is a work in progress the code is experimental and subject to frequent changes**
 <hr>
 
 # Apache NetBeans with WindowManager<sup>2</sup>
