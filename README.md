@@ -18,7 +18,10 @@
     under the License.
 
 -->
-
+### This project is a Fork of the Apache NetBeans repo [apache/netbeans](https://github.com/apache/netbeans)
+<details>
+  <summary>Original NetBeans ReadMe</summary>
+    
 # Apache NetBeans
 
 Apache NetBeans is an open source development environment, tooling platform, and application framework.
@@ -134,3 +137,4 @@ $ git blame platform/uihandler/arch.xml
 Many thanks to Emilian Bold who converted the ancient history to his
 [Git repository](https://github.com/emilianbold/netbeans-releases)
 and made the magic possible!
+</details>
