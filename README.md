@@ -227,7 +227,7 @@ For example: **Moving this editor**<br><br>
 </p>
 </details>
 
-## Goal
+## Project Goal
 
 The goal of this project is to provide a replacement NetBeans Window Manager with enhanced, **consistent** functionality and to give developers using the **NetBeans Platform** a little more control over how their applications behave and look.
 
