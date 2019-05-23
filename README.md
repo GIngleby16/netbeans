@@ -142,7 +142,7 @@ and made the magic possible!
 
 **_This is a work in progress the code is experimental and subject to frequent changes_**
 
-# Apache NetBeans Window Manager <sup>2</sup>
+# Apache NetBeans with WindowManager<sup>2</sup>
 An enhanced window manager for Apache NetBeans that supports splitting secondary windows and more
 
 ![NetBeans Animation](docs/nb-animation.gif)
