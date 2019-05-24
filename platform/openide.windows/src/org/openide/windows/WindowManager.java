@@ -93,6 +93,12 @@ public abstract class WindowManager extends Object implements Serializable {
         return dummyInstance;
     }
 
+    // NEW -------------------------------------------------------------------
+
+    public abstract Set<NbWindow> getNbWindows(); 
+    public abstract NbWindow findNbWindow(String name);
+    public abstract boolean isNbWindow(Window window); 
+
     /** Finds mode of specified name.
      * @return <code>Mode</code> whith the specified name is or <code>null</code>
      *          if there does not exist such <code>Mode</code> inside window system.
@@ -812,6 +818,6 @@ public abstract class WindowManager extends Object implements Serializable {
          * Gets a list of workspaces where this component is currently open.
          * @return the set of workspaces where the managed component is open
          */
-        public Set<Workspace> whereOpened();
-    }
+        public Set<Workspace> whereOpened();                
+    }    
 }

@@ -22,6 +22,7 @@ package org.openide.windows;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
@@ -430,6 +431,26 @@ final class DummyWindowManager extends WindowManager {
         return "editor".equals(mode.getName());
     }
 
+    // NEW -------------------------------------------------------------------
+    // NB Enahnced DND / NbWindows
+    
+    @Override
+    public Set<NbWindow> getNbWindows() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isNbWindow(Window window) {
+        return false;
+    }
+
+    @Override
+    public NbWindow findNbWindow(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }    
+    
+    // -----------------------------------------------------------------------
+    
     private final class W implements Workspace {
         private static final long serialVersionUID = 1L;
         private final String name;

@@ -20,6 +20,7 @@ package org.openide.windows;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Window;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
 import javax.swing.Action;
@@ -33,11 +34,12 @@ import org.openide.windows.WindowManager.Component;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class OnShowingTest extends NbTestCase{
+public class OnShowingTest extends NbTestCase {
+
     private InstanceContent stop;
     private InstanceContent start;
     private OnShowingHandler onShowing;
-    
+
     public OnShowingTest(String n) {
         super(n);
     }
@@ -47,175 +49,195 @@ public class OnShowingTest extends NbTestCase{
         start = new InstanceContent();
         stop = new InstanceContent();
         onShowing = new OnShowingHandler(
-            new AbstractLookup(start),
-            new WindowManager() {
-                @Override
-                public void invokeWhenUIReady(Runnable run) {
-                    run.run();
-                }
-
-
-                @Override
-                public Mode findMode(String name) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public Mode findMode(TopComponent tc) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public Set<? extends Mode> getModes() {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public Frame getMainWindow() {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public void updateUI() {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected Component createTopComponentManager(TopComponent c) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public Workspace createWorkspace(String name, String displayName) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public Workspace findWorkspace(String name) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public Workspace[] getWorkspaces() {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public void setWorkspaces(Workspace[] workspaces) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public Workspace getCurrentWorkspace() {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public TopComponentGroup findTopComponentGroup(String name) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public void addPropertyChangeListener(PropertyChangeListener l) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public void removePropertyChangeListener(PropertyChangeListener l) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentOpen(TopComponent tc) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentClose(TopComponent tc) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentRequestActive(TopComponent tc) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentRequestVisible(TopComponent tc) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentDisplayNameChanged(TopComponent tc, String displayName) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentHtmlDisplayNameChanged(TopComponent tc, String htmlDisplayName) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentToolTipChanged(TopComponent tc, String toolTip) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentIconChanged(TopComponent tc, Image icon) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected void topComponentActivatedNodesChanged(TopComponent tc, Node[] activatedNodes) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected boolean topComponentIsOpened(TopComponent tc) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected Action[] topComponentDefaultActions(TopComponent tc) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                protected String topComponentID(TopComponent tc, String preferredID) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public TopComponent findTopComponent(String tcID) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
+                new AbstractLookup(start),
+                new WindowManager() {
+            @Override
+            public void invokeWhenUIReady(Runnable run) {
+                run.run();
             }
+
+            @Override
+            public Mode findMode(String name) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Mode findMode(TopComponent tc) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Set<? extends Mode> getModes() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Frame getMainWindow() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void updateUI() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected Component createTopComponentManager(TopComponent c) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Workspace createWorkspace(String name, String displayName) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Workspace findWorkspace(String name) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Workspace[] getWorkspaces() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setWorkspaces(Workspace[] workspaces) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public Workspace getCurrentWorkspace() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public TopComponentGroup findTopComponentGroup(String name) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void addPropertyChangeListener(PropertyChangeListener l) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void removePropertyChangeListener(PropertyChangeListener l) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentOpen(TopComponent tc) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentClose(TopComponent tc) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentRequestActive(TopComponent tc) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentRequestVisible(TopComponent tc) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentDisplayNameChanged(TopComponent tc, String displayName) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentHtmlDisplayNameChanged(TopComponent tc, String htmlDisplayName) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentToolTipChanged(TopComponent tc, String toolTip) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentIconChanged(TopComponent tc, Image icon) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected void topComponentActivatedNodesChanged(TopComponent tc, Node[] activatedNodes) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected boolean topComponentIsOpened(TopComponent tc) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected Action[] topComponentDefaultActions(TopComponent tc) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            protected String topComponentID(TopComponent tc, String preferredID) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public TopComponent findTopComponent(String tcID) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            // NEW -------------------------------------------------------------------
+            // NB Enahnced DND / NbWindows
+            @Override
+            public Set<NbWindow> getNbWindows() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public boolean isNbWindow(Window window) {
+                return false;
+            }
+
+            @Override
+            public NbWindow findNbWindow(String name) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+            // -----------------------------------------------------------------------
+
+        }
         );
     }
-    
+
     public void testShowingInvokedDuringInit() {
-        final boolean[] ok = { false };
+        final boolean[] ok = {false};
         start.add(new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 ok[0] = true;
             }
         });
-        
+
         onShowing.initialize();
-        
+
         assertTrue("Initialized", ok[0]);
     }
 
     public void testShowingIsInvokedWhenModuleIsAdded() {
-        final boolean[] ok = { false };
-        
+        final boolean[] ok = {false};
+
         onShowing.initialize();
         start.add(new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 ok[0] = true;
             }
         });
-        
+
         assertTrue("Initialized", ok[0]);
     }
 }
