@@ -20,7 +20,7 @@
 -->
 #### This project is a Fork of the Apache NetBeans repo [apache/netbeans](https://github.com/apache/netbeans)
 <details>
-  <summary>Original NetBeans ReadMe</summary>
+  <summary>Click to read: Original NetBeans ReadMe</summary>
         
 # Apache NetBeans
 
@@ -151,7 +151,7 @@ An enhanced window manager for Apache NetBeans that supports splitting secondary
 The NetBeans WindowManager has a long history and it has changed considerably over the years.  Some of these changes have lead to behavior that is inconsistent/unexpected. 
 
 <details>
-  <summary>More details...</summary>
+  <summary>Click to read: The Current Window Manager Inconsistencies</summary>
   <br>
 <p>Once there was a main editor region surrounded by ancilliary views.  These ancilliary views could be docked in regions above, below and to the side of the main editor region but Editors and Views could not be mixed within the same dockable regions.  Users could divide up their main window to show as much useful information as possible.</p>
    
