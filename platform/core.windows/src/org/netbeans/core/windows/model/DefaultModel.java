@@ -754,21 +754,23 @@ final class DefaultModel implements Model {
                     System.out.println("Mode is empty but isEmpty=" + mode.isEmpty());
                     // does the mode belong to a topwindow?
                     NbWindow window = WindowManagerImpl.getInstance().getWindowForMode(mode);
-                    System.out.println("EMPTY MODE BELONGS TO WINDOW: " + window);
+                    if(window != null) {
+                        System.out.println("EMPTY MODE BELONGS TO WINDOW: " + window);
 
-                    // need to check for main window
-                    Set<ModeImpl> modes = getModesForWindow((NbWindowImpl)window);
-                    boolean isEmpty = true;
-                    for(ModeImpl m: modes) {
-                        if(!m.getOpenedTopComponents().isEmpty()) {
-                            isEmpty = false;
-                            break;
+                        // need to check for main window
+                        Set<ModeImpl> modes = getModesForWindow((NbWindowImpl)window);
+                        boolean isEmpty = true;
+                        for(ModeImpl m: modes) {
+                            if(!m.getOpenedTopComponents().isEmpty()) {
+                                isEmpty = false;
+                                break;
+                            }
                         }
-                    }
-                    if(isEmpty) {
-                        // does this really close the window?
-                        window.setVisible(false);
-                        WindowManagerImpl.getInstance().destroyNbWindow((NbWindowImpl)window);
+                        if(isEmpty) {
+                            // does this really close the window?
+                            window.setVisible(false);
+                            WindowManagerImpl.getInstance().destroyNbWindow((NbWindowImpl)window);
+                        }
                     }
                 }
             }
