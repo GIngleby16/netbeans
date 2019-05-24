@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: com.delta.test
+OpenIDE-Module-Install: com/delta/test/Installer.class
+OpenIDE-Module-Localizing-Bundle: com/delta/test/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
+OpenIDE-Module-Specification-Version: 1.0
+
