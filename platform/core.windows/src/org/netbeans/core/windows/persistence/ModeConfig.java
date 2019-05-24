@@ -77,6 +77,8 @@ public class ModeConfig {
     /** ID of top component that was selected before switching to/from maximized mode */
     public String previousSelectedTopComponentID;
     
+    public String nbWindowID = "";
+    
     /** Creates a new instance of ModeConfig */
     public ModeConfig() {
         name = ""; // NOI18N
@@ -84,6 +86,7 @@ public class ModeConfig {
         selectedTopComponentID = ""; // NOI18N
         tcRefConfigs = new TCRefConfig[0];
         previousSelectedTopComponentID = ""; // NOI18N
+        nbWindowID = "";
     }
     
     public boolean equals (Object obj) {
@@ -137,6 +140,9 @@ public class ModeConfig {
         if (permanent != modeCfg.permanent) {
             return false;
         }
+        if (nbWindowID != modeCfg.nbWindowID) {
+            return false;
+        }
         if( minimized != modeCfg.minimized )
             return false;
         //Order of tcRefConfigs is defined
@@ -178,6 +184,7 @@ public class ModeConfig {
         hash = 37 * hash + name.hashCode();
         hash = 37 * hash + state;
         hash = 37 * hash + kind;
+        hash = 37 * hash + nbWindowID.hashCode();
         if (side != null) {
             hash = 37 * hash + side.hashCode();
         }

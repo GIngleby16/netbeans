@@ -22,6 +22,7 @@ package org.netbeans.core.windows.actions;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.Switches;
 import org.netbeans.core.windows.WindowManagerImpl;
@@ -101,6 +102,12 @@ public final class UndockWindowAction extends AbstractAction {
             res &= Switches.isTopComponentUndockingEnabled() && Switches.isUndockingEnabled(context);
             if( res ) {
                 res &= WindowManagerImpl.getInstance().isDocked( context );
+            }
+            if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+                // float should only be available in the main window
+                ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(context);
+                NbWindowImpl win = WindowManagerImpl.getInstance().getWindowForMode(mode);
+                res &= (win == null);
             }
         }
         return res;

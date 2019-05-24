@@ -31,23 +31,27 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 import org.netbeans.core.windows.Constants;
-import org.openide.windows.WindowManager;
 
 /**
+ * GWI-Notes: One instance is created per slide side per window.  4 Recognizers per window.
+ * The ResizeGestureRecognizer is created by the CommandManager.
+ * 
  *
  * @author mkleint
  */
 public class ResizeGestureRecognizer implements AWTEventListener {
-    
+    private Window windowOfInterest = null;
 
 
      void attachResizeRecognizer(String side, Component component) {
+         windowOfInterest = SwingUtilities.windowForComponent(component);
          update(side, component);
          Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_MOTION_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
      }
      void detachResizeRecognizer(String side, Component component) {
          Toolkit.getDefaultToolkit().removeAWTEventListener(this);
          update(null, null);
+         windowOfInterest = null;
      }
      
     
@@ -161,10 +165,11 @@ public class ResizeGestureRecognizer implements AWTEventListener {
         if ((evt.getSource() instanceof JPopupMenu) || (evt.getSource() instanceof JMenuItem)) {
             return;
         }
+        
         //#210162 - ignore when the mouse is over a dialog window
-        Frame mainWindow = WindowManager.getDefault().getMainWindow();
-        if( !mainWindow.equals(evt.getComponent()) &&
-            !mainWindow.equals( SwingUtilities.getWindowAncestor( evt.getComponent() ) ) ) {
+//        Frame mainWindow = WindowManager.getDefault().getMainWindow();
+        if( !windowOfInterest.equals(evt.getComponent()) &&
+            !windowOfInterest.equals( SwingUtilities.getWindowAncestor( evt.getComponent() ) ) ) {
             return;
         }
         if (evt.getID() == MouseEvent.MOUSE_MOVED) {

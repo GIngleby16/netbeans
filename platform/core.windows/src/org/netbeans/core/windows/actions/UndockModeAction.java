@@ -22,6 +22,7 @@ package org.netbeans.core.windows.actions;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.Switches;
@@ -95,6 +96,12 @@ public final class UndockModeAction extends AbstractAction {
     @Override
     public boolean isEnabled() {
         ModeImpl contextMode = getMode2WorkWith();
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            // float should only be available in the main window
+            NbWindowImpl win = WindowManagerImpl.getInstance().getWindowForMode(contextMode);
+            if(win != null)
+                return false;
+        }
         if( null == contextMode )
             return false;
         boolean docked = contextMode.getState() == Constants.MODE_STATE_JOINED;

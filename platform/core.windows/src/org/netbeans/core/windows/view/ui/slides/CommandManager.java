@@ -23,7 +23,10 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.Border;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
+import org.netbeans.core.windows.ModeImpl;
+import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.swing.tabcontrol.SlideBarDataModel;
 import org.netbeans.swing.tabcontrol.SlidingButton;
 import org.netbeans.swing.tabcontrol.TabData;
@@ -58,9 +61,12 @@ final class CommandManager implements ActionListener {
     private int curSlidedIndex;
     private ResizeGestureRecognizer recog;
     
+    private NbWindowImpl window;
     
-    public CommandManager(SlideBar slideBar) {
+    
+    public CommandManager(NbWindowImpl window, SlideBar slideBar) {
         this.slideBar = slideBar;
+        this.window = window;
         recog = new ResizeGestureRecognizer(this);
     }
    
@@ -72,7 +78,8 @@ final class CommandManager implements ActionListener {
         if (!isCompSlided()) {
             return;
         }
-        SlideOperation op = SlideOperationFactory.createSlideResize(getSlidingTabbed().getComponent(), curSlideOrientation);
+        
+        SlideOperation op = SlideOperationFactory.createSlideResize(window, getSlidingTabbed().getComponent(), curSlideOrientation);
         Rectangle finish = getSlidingTabbed().getComponent().getBounds(null);
         String side = orientation2Side(curSlideOrientation);
         if (Constants.BOTTOM.equals(side)) {
@@ -108,8 +115,12 @@ final class CommandManager implements ActionListener {
         curSlideOrientation = model.getOrientation();
         curSlideButton = slideBar.getButton(tabIndex);
         Tabbed cont = updateSlidedTabContainer(tabIndex);
-        SlideOperation operation = SlideOperationFactory.createSlideIn(
-            cont.getComponent(), curSlideOrientation, true, true);
+        
+        TopComponent tc = cont.getTopComponentAt(0);
+        ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(tc);
+        NbWindowImpl window2 = WindowManagerImpl.getInstance().getWindowForMode(mode);
+        
+        SlideOperation operation = SlideOperationFactory.createSlideIn(window2, cont.getComponent(), curSlideOrientation, true, true);
 
         boolean alreadyListening = false;
         for( AWTEventListener el : Toolkit.getDefaultToolkit().getAWTEventListeners() ) {
@@ -136,7 +147,12 @@ final class CommandManager implements ActionListener {
             return;
         }
         
-        SlideOperation operation = SlideOperationFactory.createSlideOut(
+        TopComponent tc = (TopComponent)curSlidedComp;
+        ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(tc);
+        NbWindowImpl window2 = WindowManagerImpl.getInstance().getWindowForMode(mode);
+        
+                
+        SlideOperation operation = SlideOperationFactory.createSlideOut(window2,
             getSlidingTabbed().getComponent(), curSlideOrientation, useEffect, requestsActivation);
         
         Toolkit.getDefaultToolkit().removeAWTEventListener( getAWTListener() );
@@ -157,7 +173,7 @@ final class CommandManager implements ActionListener {
     public void slideIntoDesktop(int tabIndex, boolean useEffect) {
         SlideOperation operation = null;
         if (isCompSlided()) {
-            operation = SlideOperationFactory.createSlideIntoDesktop(
+            operation = SlideOperationFactory.createSlideIntoDesktop(window,
                 getSlidingTabbed().getComponent(), curSlideOrientation, useEffect);
         }
         recog.detachResizeRecognizer(orientation2Side(curSlideOrientation), getSlidingTabbed().getComponent());

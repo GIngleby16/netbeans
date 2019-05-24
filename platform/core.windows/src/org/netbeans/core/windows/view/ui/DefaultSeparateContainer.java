@@ -66,6 +66,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
     /** Creates a DefaultSeparateContainer. */
     public DefaultSeparateContainer(final ModeView modeView, WindowDnDManager windowDnDManager, Rectangle bounds, int kind) {
         super(modeView, windowDnDManager, kind);
+        System.out.println("DefaultSeparateContainer,kind=" + kind);
         // JFrame or JDialog according to the mode kind
         if (kind == Constants.MODE_KIND_EDITOR) {
             modeFrame = new ModeFrame(this, modeView);
@@ -168,7 +169,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
             enableEvents(java.awt.AWTEvent.MOUSE_EVENT_MASK);
             modeBase = new SharedModeUIBaseImpl(abstractModeContainer, view, this);
             setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        }
+        }        
 
         @Override
         public ModeView getModeView() {
@@ -259,6 +260,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
         
         public ModeDialog (Frame owner, AbstractModeContainer abstractModeContainer, ModeView view) {
             super(owner);
+            System.out.println("ModeDialog");
             // To be able to activate on mouse click.
             enableEvents(java.awt.AWTEvent.MOUSE_EVENT_MASK);
             modeBase = new SharedModeUIBaseImpl(abstractModeContainer, view, this);
@@ -380,6 +382,12 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
             super.setLocation( x, y );
             ignoreMovedEvents = false;
         }
+
+        @Override
+        public void setVisible(boolean b) {
+            System.out.println("ModeDialog:setVisible " + b);
+            super.setVisible(b); //To change body of generated methods, choose Tools | Templates.
+        }
     } // end of ModeDialog
 
     /** Defines shared common attributes of UI element for separate mode. */
@@ -446,6 +454,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
 
                 @Override
                 public void windowClosed (WindowEvent evt) {
+                    System.out.println("DefaultSeparateContainer:windowClosed");
                     ZOrderManager.getInstance().detachWindow((RootPaneContainer)window);
                 }
 

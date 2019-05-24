@@ -20,7 +20,7 @@
 package org.netbeans.core.windows.view.ui.slides;
 
 import java.awt.Component;
-import java.awt.Rectangle;
+import org.netbeans.core.windows.NbWindowImpl;
 
 /**
  * Factory for possible types of sliding operations with asociated effect.
@@ -43,52 +43,52 @@ public final class SlideOperationFactory {
         // no need to instantiate
     }
     
-    public static SlideOperation createSlideIn(Component component, 
+    public static SlideOperation createSlideIn(NbWindowImpl window, Component component, 
         int orientation, boolean useEffect, boolean requestActivation) {
             
-        SlideOperation result = new SlideOperationImpl(SlideOperation.SLIDE_IN, 
+        SlideOperation result = new SlideOperationImpl(window, SlideOperation.SLIDE_IN, 
                 component, orientation, useEffect && EFFECTS_ENABLED ? slideInFx : null,
                 requestActivation);
                 
         return result;
     }
 
-    public static SlideOperation createSlideOut(Component component, 
+    public static SlideOperation createSlideOut(NbWindowImpl window, Component component, 
         int orientation, boolean useEffect, boolean requestActivation) {
             
-        SlideOperation result = new SlideOperationImpl(SlideOperation.SLIDE_OUT, 
+        SlideOperation result = new SlideOperationImpl(window, SlideOperation.SLIDE_OUT, 
                 component, orientation, useEffect && EFFECTS_ENABLED ? slideOutFx : null,
                 requestActivation);
                 
         return result;
     }
     
-    public static SlideOperation createSlideIntoEdge(Component component, 
+    public static SlideOperation createSlideIntoEdge(NbWindowImpl window, Component component, 
         String side, boolean useEffect) {
             
-        SlideOperation result = new SlideOperationImpl(SlideOperation.SLIDE_INTO_EDGE,
-                component, side, useEffect && EFFECTS_ENABLED ? slideIntoEdgeFx : null, false);
+        SlideOperation result = new SlideOperationImpl(window, SlideOperation.SLIDE_INTO_EDGE,
+                component, side, (useEffect && EFFECTS_ENABLED ? slideIntoEdgeFx : null), false);
                 
         return result;
     }
     
-    public static SlideOperation createSlideIntoDesktop(Component component, 
+    public static SlideOperation createSlideIntoDesktop(NbWindowImpl window, Component component, 
         int orientation, boolean useEffect) {
             
-        SlideOperation result = new SlideOperationImpl(SlideOperation.SLIDE_INTO_DESKTOP,
+        SlideOperation result = new SlideOperationImpl(window, SlideOperation.SLIDE_INTO_DESKTOP,
                 component, orientation, useEffect && EFFECTS_ENABLED ? slideIntoDesktopFx : null, false);
                 
         return result;
     }
     
-    public static SlideOperation createSlideResize(Component component, int orientation) {
-        SlideOperation result = new SlideOperationImpl(SlideOperation.SLIDE_RESIZE,
+    public static SlideOperation createSlideResize(NbWindowImpl window, Component component, int orientation) {
+        SlideOperation result = new SlideOperationImpl(window, SlideOperation.SLIDE_RESIZE,
                 component, orientation, null, false);
                 
         return result;
     }
     
-    public static SlideOperation createSlideResize(Component component, String side) {
-        return createSlideResize( component, SlideOperationImpl.side2Orientation( side ) );
+    public static SlideOperation createSlideResize(NbWindowImpl window, Component component, String side) {
+        return createSlideResize( window, component, SlideOperationImpl.side2Orientation( side ) );
     }
 }

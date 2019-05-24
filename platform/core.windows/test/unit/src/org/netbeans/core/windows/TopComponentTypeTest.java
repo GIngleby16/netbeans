@@ -47,7 +47,7 @@ public class TopComponentTypeTest extends NbTestCase {
      
     public void testIsEditorTopComponent () throws Exception {
         TopComponent tc = new TopComponent ();
-        Mode mode = WindowManagerImpl.getInstance().createMode( "editorMode", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
+        Mode mode = WindowManagerImpl.getInstance().createMode(null, "editorMode", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
         mode.dockInto( tc );
         
         assertTrue( WindowManagerImpl.getInstance().isEditorTopComponent( tc ) );
@@ -56,7 +56,7 @@ public class TopComponentTypeTest extends NbTestCase {
     
     public void testIsViewTopComponent () throws Exception {
         TopComponent tc = new TopComponent ();
-        Mode mode = WindowManagerImpl.getInstance().createMode( "viewMode", Constants.MODE_KIND_VIEW, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
+        Mode mode = WindowManagerImpl.getInstance().createMode(null, "viewMode", Constants.MODE_KIND_VIEW, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
         mode.dockInto( tc );
         
         assertFalse( WindowManagerImpl.getInstance().isEditorTopComponent( tc ) );
@@ -73,8 +73,8 @@ public class TopComponentTypeTest extends NbTestCase {
     public void testIsOpenedEditorTopComponent() throws Exception {
         final TopComponent editorTc = new TopComponent ();
         final TopComponent viewTc = new TopComponent ();
-        Mode editorMode = WindowManagerImpl.getInstance().createMode( "editorMode", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
-        Mode viewMode = WindowManagerImpl.getInstance().createMode( "viewMode", Constants.MODE_KIND_VIEW, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
+        Mode editorMode = WindowManagerImpl.getInstance().createMode(null, "editorMode", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
+        Mode viewMode = WindowManagerImpl.getInstance().createMode(null, "viewMode", Constants.MODE_KIND_VIEW, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
         Logger logger = Logger.getLogger( WindowManagerImpl.class.getName() );
         final MyHandler handler = new MyHandler();
         logger.addHandler( handler );

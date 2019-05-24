@@ -952,6 +952,7 @@ class ModeParser {
         }
         
         public void startElement (String nameSpace, String name, String qname, Attributes attrs) throws SAXException {
+            //TODO gwi-now: This is where mode is read
             if ("mode".equals(qname)) { // NOI18N
                 handleMode(attrs);
             } else if (internalConfig.specVersion != null && 
@@ -985,6 +986,8 @@ class ModeParser {
                     handleActiveTC(attrs);
                 } else if ("empty-behavior".equals(qname)) { // NOI18N
                     handleEmptyBehavior(attrs);
+                } else if ("nbwindow".equals(qname)) { // NOI18N
+                    handleNbWindowID(attrs);
                 }
             } else {
                 if (DEBUG) Debug.log(ModeParser.class, "-- ModeParser.startElement PARSING OLD");
@@ -1410,6 +1413,10 @@ class ModeParser {
                 modeConfig.permanent = false;
             }
         }
+
+        private void handleNbWindowID (Attributes attrs) {
+            modeConfig.nbWindowID = attrs.getValue("id"); // NOI18N
+        }
         
         /** Writes data from asociated mode to the xml representation */
         void writeData (ModeConfig mc, InternalConfig ic) throws IOException {
@@ -1470,6 +1477,8 @@ class ModeParser {
             appendFrame(mc, buff);
             appendActiveTC(mc, buff);
             appendEmptyBehavior(mc, buff);
+            appendNbWindow(mc, buff);
+            // TODO gwi-now: This is where the mode is written!
             
             buff.append("</mode>\n"); // NOI18N
             return buff;
@@ -1621,6 +1630,10 @@ class ModeParser {
         
         private void appendEmptyBehavior (ModeConfig mc, StringBuffer buff) {
             buff.append("    <empty-behavior permanent=\"").append(mc.permanent).append("\"/>\n"); // NOI18N
+        }
+
+        private void appendNbWindow(ModeConfig mc, StringBuffer buff) {
+            buff.append("    <nbwindow id=\"").append(mc.nbWindowID).append("\"/>\n"); // NOI18N
         }
     }
     

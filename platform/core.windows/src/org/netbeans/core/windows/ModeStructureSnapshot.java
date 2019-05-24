@@ -27,6 +27,7 @@ import org.openide.windows.TopComponent;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import org.netbeans.core.windows.NbWindowStructureSnapshot.NbWindowSnapshot;
 
 
 /**
@@ -35,41 +36,39 @@ import java.util.List;
  * @author  Peter Zavadsky
  */
 public class ModeStructureSnapshot {
-
-    private final ElementSnapshot splitRootSnapshot;
+    // map of window to splitroot & sliding modes for that window, a null nbwindow reference is used to represent the main-window
+    private final Map<NbWindowSnapshot, WindowModeStructureSnapshot> windowModeStructures;
 
     private final Set<ModeSnapshot> separateModeSnapshots;
 
-    private final Set<SlidingModeSnapshot> slidingModeSnapshots;
-
     /** Creates a new instance of ModesModelSnapshot. */
-    public ModeStructureSnapshot(ElementSnapshot splitRootSnapshot, 
-            Set<ModeSnapshot> separateModeSnapshots,
-            Set<SlidingModeSnapshot> slidingModeSnapshots) {
-        this.splitRootSnapshot = splitRootSnapshot;
+    public ModeStructureSnapshot(Map<NbWindowSnapshot, WindowModeStructureSnapshot> windowModeStructures, Set<ModeSnapshot> separateModeSnapshots) {
+        this.windowModeStructures = windowModeStructures;
         this.separateModeSnapshots = separateModeSnapshots;
-        this.slidingModeSnapshots = slidingModeSnapshots;
     }
-
-    public ElementSnapshot getSplitRootSnapshot() {
-        return splitRootSnapshot;
+    
+    public Map<NbWindowSnapshot, WindowModeStructureSnapshot> getWindowModeStructures() {
+        return windowModeStructures;
     }
     
     public ModeSnapshot[] getSeparateModeSnapshots() {
         return separateModeSnapshots.toArray(new ModeSnapshot[0]);
     }
     
-    public SlidingModeSnapshot[] getSlidingModeSnapshots() {
-        return slidingModeSnapshots.toArray(new SlidingModeSnapshot[0]);
-    }
-
+    
     /** @param name name of mode */
     public ModeSnapshot findModeSnapshot(String name) {
-        ModeSnapshot ma = findModeSnapshotOfName(splitRootSnapshot, name);
-        if(ma != null) {
-            return ma;
-        }
+        ModeSnapshot ma;
         
+        // search all split roots
+        for(WindowModeStructureSnapshot windowModeStructureSnapshot : windowModeStructures.values()) {
+            ma = findModeSnapshotOfName(windowModeStructureSnapshot.splitRootSnapshot, name);
+            if(ma != null) {
+                return ma;
+            }
+        }
+                
+        // search all separated modes
         for(Iterator it = separateModeSnapshots.iterator(); it.hasNext(); ) {
             ma = (ModeSnapshot)it.next();
             if(name.equals(ma.getName())) {
@@ -77,10 +76,13 @@ public class ModeStructureSnapshot {
             }
         }
         
-        for(Iterator it = slidingModeSnapshots.iterator(); it.hasNext(); ) {
-            ma = (SlidingModeSnapshot)it.next();
-            if(name.equals(ma.getName())) {
-                return ma;
+        for(WindowModeStructureSnapshot windowModeStructureSnapshot : windowModeStructures.values()) {
+            // search all sliding modes
+            for(Iterator it = windowModeStructureSnapshot.slidingModeSnapshots.iterator(); it.hasNext(); ) {
+                ma = (SlidingModeSnapshot)it.next();
+                if(name.equals(ma.getName())) {
+                    return ma;
+                }
             }
         }
         
@@ -251,6 +253,24 @@ public class ModeStructureSnapshot {
         }
        
     }
+    
+    public static class WindowModeStructureSnapshot {
+        private final ElementSnapshot splitRootSnapshot;
+        private final Set<SlidingModeSnapshot> slidingModeSnapshots;
+        
+        public WindowModeStructureSnapshot(ElementSnapshot splitRootSnapshot, Set<SlidingModeSnapshot> slidingModeSnapshots) {
+            this.splitRootSnapshot = splitRootSnapshot;
+            this.slidingModeSnapshots = slidingModeSnapshots;
+        }
+
+        public ElementSnapshot getSplitRootSnapshot() {
+            return splitRootSnapshot;
+        }
+
+        public SlidingModeSnapshot[] getSlidingModeSnapshots() {
+            return slidingModeSnapshots.toArray(new SlidingModeSnapshot[0]);
+        }
+    }
 
     /** */
     public static class ModeSnapshot extends ElementSnapshot { 
@@ -339,7 +359,8 @@ public class ModeStructureSnapshot {
             
             if(mode.getKind() == Constants.MODE_KIND_EDITOR ) {
                 WindowManagerImpl wm = WindowManagerImpl.getInstance();
-                if( null != wm.getEditorMaximizedMode() && wm.getEditorMaximizedMode() != mode )
+                NbWindowImpl window = wm.getWindowForMode(mode);
+                if( null != wm.getEditorMaximizedMode(window) && wm.getEditorMaximizedMode(window) != mode )
                     return false;
             }
 
@@ -430,13 +451,19 @@ public class ModeStructureSnapshot {
             return super.toString() + "\n" + editorAreaSnapshot; // NOI18N
         }
     }
-
     
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("\nModesSnapshot hashCode=" + Integer.toHexString(hashCode())); // NOI18N
-        sb.append("\nSplit modes:\n"); // NOI18N
-        sb.append(dumpSnapshot(splitRootSnapshot, 0)); 
+        StringBuilder sb = new StringBuilder();        
+        sb.append("ModesSnapshot hashCode=" + Integer.toHexString(hashCode()) + "\n"); // NOI18N
+        for(NbWindowSnapshot window: windowModeStructures.keySet()) {
+            WindowModeStructureSnapshot wmss = windowModeStructures.get(window);
+            
+            sb.append("Window " + (window==null?"NbMainWindow":window.getName()) + "\n");            
+            sb.append("SplitRoot\n");
+            sb.append(dumpSnapshot(wmss.getSplitRootSnapshot(), 0)); 
+            sb.append("Sliding\n");
+            sb.append(dumpSet(wmss.slidingModeSnapshots));
+        }        
         sb.append("\nSeparate Modes:"); // NOI18N
         sb.append(dumpSet(separateModeSnapshots));
         return sb.toString();

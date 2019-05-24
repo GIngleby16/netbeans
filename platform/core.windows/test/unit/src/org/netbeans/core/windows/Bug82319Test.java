@@ -45,7 +45,7 @@ public class Bug82319Test extends NbTestCase {
         Node node1 = new AbstractNode(Children.LEAF);
         Node node2 = new AbstractNode(Children.LEAF);
         
-        Mode mode = WindowManagerImpl.getInstance().createMode("test82319Mode",
+        Mode mode = WindowManagerImpl.getInstance().createMode(null, "test82319Mode",
                 Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
         
         TopComponent tc1 = new TopComponent();

@@ -26,6 +26,7 @@ import org.netbeans.core.windows.model.ModelElement;
 import org.openide.windows.TopComponent;
 
 import java.awt.*;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 
 
@@ -56,7 +57,7 @@ public interface ControllerHandler {
     
     public void userChangedFrameStateMode(ModeImpl mode, int frameState);
     
-    public void userChangedSplit( ModelElement[] snapshots, double[] splitWeights );
+    public void userChangedSplit( NbWindowImpl window, ModelElement[] snapshots, double[] splitWeights );
     
     public void userClosedTopComponent(ModeImpl mode, TopComponent tc);
     
@@ -71,17 +72,17 @@ public interface ControllerHandler {
     // Helpers<<
     
     // DnD>>
-    public void userDroppedTopComponents(ModeImpl mode, TopComponentDraggable draggable);
+    public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable);
     
-    public void userDroppedTopComponents(ModeImpl mode, TopComponentDraggable draggable, int index);
+    public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable, int index);
     
-    public void userDroppedTopComponents(ModeImpl mode, TopComponentDraggable draggable, String side);
+    public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable, String side);
     
-    public void userDroppedTopComponentsIntoEmptyEditor(TopComponentDraggable draggable);
+    public void userDroppedTopComponentsIntoEmptyEditor(NbWindowImpl window, TopComponentDraggable draggable);
     
-    public void userDroppedTopComponentsAround(TopComponentDraggable draggable, String side);
+    public void userDroppedTopComponentsAround(NbWindowImpl window, TopComponentDraggable draggable, String side);
     
-    public void userDroppedTopComponentsAroundEditor(TopComponentDraggable draggable, String side);
+    public void userDroppedTopComponentsAroundEditor(NbWindowImpl window, TopComponentDraggable draggable, String side);
     
     public void userDroppedTopComponentsIntoFreeArea(TopComponentDraggable draggable, Rectangle bounds);
     // DnD<<
@@ -99,5 +100,11 @@ public interface ControllerHandler {
     public void userResizedSlidingMode(ModeImpl mode, Rectangle rect);
     // Sliding<<
     
+    
+    // NEW ------------------------------------------------------------------
+    
+    public void userResizedNbWindow(NbWindowImpl window, Rectangle bounds);
+    public void userClosedNbWindow(NbWindowImpl window);
+    public void destroyNbWindow(NbWindowImpl window);
 }
 

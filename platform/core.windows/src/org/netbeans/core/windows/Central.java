@@ -26,6 +26,7 @@ import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,6 +40,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
 import org.netbeans.core.windows.model.DockingStatus;
@@ -49,10 +52,12 @@ import org.netbeans.core.windows.options.WinSysPrefs;
 import org.netbeans.core.windows.view.ControllerHandler;
 import org.netbeans.core.windows.view.View;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
+import org.netbeans.core.windows.view.dnd.ZOrderManager;
+import org.openide.util.Lookup;
 import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-
+import org.openide.windows.NbWindowSelector;
 
 
 /**
@@ -194,25 +199,29 @@ final class Central implements ControllerHandler {
             }
         }
         
+        // We should be able to find the window based on the mode?
+        NbWindowImpl window = model.getWindowForMode(activeMode);
+        
         final ModeImpl old = getActiveMode();
         if(activeMode == old) {
+            
             // kind of workaround to the scenario when a window slides out automatically
             // and user clicks in the currently active mode, not allow to exit in such case and fire changes to
             // force the slided-out window to disappear.
-            ModeImpl impl = model.getSlidingMode(Constants.BOTTOM);
+            ModeImpl impl = model.getSlidingMode(window, Constants.BOTTOM);
             boolean bottom = (impl == null || impl.getSelectedTopComponent() == null);
-            impl = model.getSlidingMode(Constants.LEFT);
+            impl = model.getSlidingMode(window, Constants.LEFT);
             boolean left = (impl == null || impl.getSelectedTopComponent() == null);
-            impl = model.getSlidingMode(Constants.RIGHT);
+            impl = model.getSlidingMode(window, Constants.RIGHT);
             boolean right = (impl == null || impl.getSelectedTopComponent() == null);
-            impl = model.getSlidingMode(Constants.TOP);
+            impl = model.getSlidingMode(window, Constants.TOP);
             boolean top = (impl == null || impl.getSelectedTopComponent() == null);
             if (bottom && left && right && top) {
                 return;
             }
         }
         
-        model.setActiveMode(activeMode);
+        model.setActiveMode(window, activeMode);
         
         if(isVisible()) {
             viewRequestor.scheduleRequest(
@@ -258,13 +267,13 @@ final class Central implements ControllerHandler {
     }
 
     /** Sets editor area constraints into model and requests view (if needed). */
-    public void setEditorAreaConstraints(SplitConstraint[] editorAreaConstraints) {
-        SplitConstraint[] old = getEditorAreaConstraints();
+    public void setEditorAreaConstraints(NbWindowImpl window, SplitConstraint[] editorAreaConstraints) {
+        SplitConstraint[] old = getEditorAreaConstraints(window);
         if(Arrays.equals(old, editorAreaConstraints)) {
             return;
         }
         
-        model.setEditorAreaConstraints(editorAreaConstraints);
+        model.setEditorAreaConstraints(window, editorAreaConstraints);
 
         if(isVisible()) {
             viewRequestor.scheduleRequest(
@@ -311,7 +320,7 @@ final class Central implements ControllerHandler {
                         targetMode = WindowManagerImpl.getInstance().createModeImpl(
                             ModeImpl.getUnusedModeName(), Constants.MODE_KIND_VIEW, false);
                         model.setModeState(targetMode, requiredState);
-                        model.addMode(targetMode, constraints);
+                        model.addMode(null, targetMode, constraints);  // gwi-editor: setEditorState needs NbWindow
                     }
                     moveTopComponentIntoMode(targetMode, tcs[i] );                    
                 }
@@ -359,27 +368,29 @@ final class Central implements ControllerHandler {
     }
     
     /** Sets new maximized mode into model and requests view update (if needed). */
-    void switchMaximizedMode(ModeImpl newMaximizedMode) {
-        ModeImpl old = getCurrentMaximizedMode();
+    void switchMaximizedMode(NbWindowImpl window, ModeImpl newMaximizedMode) {
+//        NbWindowImpl window = getWindowForMode(newMaximizedMode);
+        
+        ModeImpl old = getCurrentMaximizedMode(window); 
         if(newMaximizedMode == old) {
             return;
         }
-
+        
         WindowManagerImpl wm = WindowManagerImpl.getInstance();
         if( null == newMaximizedMode ) {
             //cancel current maximized mode
-            if( isViewMaximized() ) {
+            if( isViewMaximized(window) ) { 
                 //some non-editor TopComponent is currently maximized
                 
                 //restore docking status of other components
-                if( isEditorMaximized() ) {
-                    restoreViews( model.getMaximizedDockingStatus() );
+                if( isEditorMaximized(window) ) { 
+                    restoreViews(window, model.getMaximizedDockingStatus(window) ); 
                 } else {
-                    restoreViews( model.getDefaultDockingStatus() );
+                    restoreViews(window, model.getDefaultDockingStatus(window) ); 
                 }
                 
                 //return the maximized TopComponent to its original mode
-                ModeImpl currentMaximizedMode = getViewMaximizedMode();
+                ModeImpl currentMaximizedMode = getViewMaximizedMode(window); 
                 if( currentMaximizedMode.getTopComponents().length == 1 ) {
                     TopComponent maximizedTC = currentMaximizedMode.getTopComponents()[0];
                     String tcID = wm.findTopComponentID( maximizedTC );
@@ -395,19 +406,19 @@ final class Central implements ControllerHandler {
                                 // create mode with the same constraints to dock topcomponent back into
                                 prevMode = WindowManagerImpl.getInstance().createModeImpl(
                                         ModeImpl.getUnusedModeName(), Constants.MODE_KIND_VIEW, false);
-                                model.addMode(prevMode, constraints);
+                                model.addMode(window, prevMode, constraints);
                             }
                         }
 
                         if (prevMode == null) {
                             // fallback, previous saved mode not found somehow, use default modes
-                            prevMode = WindowManagerImpl.getInstance().getDefaultViewMode();
+                            prevMode = WindowManagerImpl.getInstance().getDefaultViewMode(window); 
                         }
                     }
                     prevMode.addOpenedTopComponent( maximizedTC, prevIndex );
                     prevMode.setSelectedTopComponent( maximizedTC );
                     setActiveMode(prevMode);
-                    model.removeMode( currentMaximizedMode );
+                    model.removeMode( currentMaximizedMode, false );
                 } else {
                     Logger.getLogger( Central.class.getName() ).log( Level.WARNING, 
                             "A 'view' mode is maximized but it has wrong number of TopComponents, Mode=[" 
@@ -416,32 +427,32 @@ final class Central implements ControllerHandler {
                 //cancel the maximized mode
                 setViewMaximizedMode( null );
                 
-            } else if( isEditorMaximized() ) {
+            } else if( isEditorMaximized(window) ) {
                 //an editor TopComponent is maximized
-                model.getMaximizedDockingStatus().mark();
+                model.getMaximizedDockingStatus(window).mark();
                 ModeImpl prevActiveMode = getActiveMode();
                 //restore the docking status of other components
-                restoreViews( model.getDefaultDockingStatus() );
+                restoreViews(window, model.getDefaultDockingStatus(window) );
                 
                 //cancel the maximized mode
-                setEditorMaximizedMode( null );
+                setEditorMaximizedMode(window, null );
                 
                 setActiveMode( prevActiveMode );
                 
             }
         } else {
-            assert !isViewMaximized();
+            assert !isViewMaximized(window);
             
             //set new maximized mode
             if( newMaximizedMode.getKind() == Constants.MODE_KIND_EDITOR ) {
                 //the new maximized mode is an editor TopComponent
                 
                 //remember the current docking status of opened TopComponents
-                model.getDefaultDockingStatus().mark();
+                model.getDefaultDockingStatus(window).mark();
                 //slide-out/dock some TopComponents according to their previous state in maximized mode
-                restoreViews( model.getMaximizedDockingStatus() );
+                restoreViews(window, model.getMaximizedDockingStatus(window) );
 
-                setEditorMaximizedMode( newMaximizedMode );
+                setEditorMaximizedMode(window, newMaximizedMode );
 
             } else if( newMaximizedMode.getKind() == Constants.MODE_KIND_VIEW ) {
                 //the new maximized mode is non-editor TopComponent
@@ -456,10 +467,10 @@ final class Central implements ControllerHandler {
                 }
                 
                 //remember the docking status of opened components
-                if( isEditorMaximized() ) {
-                    model.getMaximizedDockingStatus().mark();
+                if( isEditorMaximized(window) ) {
+                    model.getMaximizedDockingStatus(window).mark();
                 } else {
-                    model.getDefaultDockingStatus().mark();
+                    model.getDefaultDockingStatus(window).mark();
                 }
                 
                 modeBeingMaximized = newMaximizedMode;
@@ -469,7 +480,7 @@ final class Central implements ControllerHandler {
 
                 //create a new mode for the maximization
                 ModeImpl mode = WindowManagerImpl.getInstance().createModeImpl(ModeImpl.getUnusedModeName(), Constants.MODE_KIND_VIEW, true);
-                model.addMode(mode, new SplitConstraint[0]);
+                model.addMode(window, mode, new SplitConstraint[0]);
                 //the mode has just one TopComponent
                 mode.addOpenedTopComponent( tcToMaximize );
                 mode.setSelectedTopComponent( tcToMaximize );
@@ -479,7 +490,7 @@ final class Central implements ControllerHandler {
                 setViewMaximizedMode( mode );
                 
                 //slide-out all other TopComponents (the editor area won't be visible)
-                slideAllViews();
+                slideAllViews(window);
                 
                 setActiveMode( mode );
 
@@ -492,31 +503,32 @@ final class Central implements ControllerHandler {
         if(isVisible()) {
             viewRequestor.scheduleRequest(
                 new ViewRequest(null, View.CHANGE_MAXIMIZED_MODE_CHANGED,
-                    old, getCurrentMaximizedMode()));
+                    old, getCurrentMaximizedMode(window)));
         }
         
         WindowManagerImpl.getInstance().doFirePropertyChange(
-            WindowManagerImpl.PROP_MAXIMIZED_MODE, old, getCurrentMaximizedMode());
+            WindowManagerImpl.PROP_MAXIMIZED_MODE, old, getCurrentMaximizedMode(window));
     }
 
     /** Sets editor mode that is currenlty maximized (used when the window system loads) */
-    void setEditorMaximizedMode(ModeImpl editorMaximizedMode) {
-        model.setEditorMaximizedMode( editorMaximizedMode );
+    void setEditorMaximizedMode(NbWindowImpl window, ModeImpl editorMaximizedMode) {
+        model.setEditorMaximizedMode(window,  editorMaximizedMode );
     }
     
     /** Sets view mode that is currenlty maximized (used when the window system loads) */
     void setViewMaximizedMode(ModeImpl viewMaximizedMode) {
-        model.setViewMaximizedMode( viewMaximizedMode );
+        NbWindowImpl window = getWindowForMode(viewMaximizedMode);
+        model.setViewMaximizedMode(window, viewMaximizedMode );
     }
     
     /** Sets constraints for mode into model and requests view (if needed). */
-    public void setModeConstraints(ModeImpl mode, SplitConstraint[] modeConstraints) {
-        SplitConstraint[] old = getModeConstraints(mode);
+    public void setModeConstraints(NbWindowImpl window, ModeImpl mode, SplitConstraint[] modeConstraints) {
+        SplitConstraint[] old = getModeConstraints(window, mode);
         if(Arrays.equals(modeConstraints, old)) {
             return;
         }
         
-        model.setModeConstraints(mode, modeConstraints);
+        model.setModeConstraints(window, mode, modeConstraints);
         
         if(isVisible()) {
             viewRequestor.scheduleRequest(
@@ -526,17 +538,17 @@ final class Central implements ControllerHandler {
     }
 
     /** Adds mode into model and requests view (if needed). */
-    public void addMode(ModeImpl mode, SplitConstraint[] modeConstraints) {
+    public void addMode(NbWindowImpl window, ModeImpl mode, SplitConstraint[] modeConstraints) {
         // PENDING which one to use?
 //        if(getModes().contains(mode)) {
 //            return;
 //        }
-        SplitConstraint[] old = getModeConstraints(mode);
+        SplitConstraint[] old = getModeConstraints(window, mode);
         if(modeConstraints == old) {
             return;
         }
         
-        model.addMode(mode, modeConstraints);
+        model.addMode(window, mode, modeConstraints);
         
         if(isVisible()) {
             viewRequestor.scheduleRequest(
@@ -556,12 +568,17 @@ final class Central implements ControllerHandler {
         if(!getModes().contains(mode)) {
             return;
         }
+        
+        System.out.println("Model:removeMode " + mode.getName());
+        
 //        debugLog("removeMode()=" + mode.getDisplayName());
-        model.removeMode(mode);
+        model.removeMode(mode, false);
+                
         if(isVisible()) {
             viewRequestor.scheduleRequest(
                 new ViewRequest(null, View.CHANGE_MODE_REMOVED, null, mode));
         }
+
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -614,7 +631,7 @@ final class Central implements ControllerHandler {
         ModeImpl oldActive = getActiveMode();
         ModeImpl newActive;
         if(mode == oldActive) {
-            newActive = setSomeModeActive();
+            newActive = setSomeModeActive(getWindowForMode(mode));
         } else {
             newActive = oldActive;
         }
@@ -626,7 +643,7 @@ final class Central implements ControllerHandler {
             // only if no sliding modes' tc points to this mode, then it's ok to remove it.
             if (doCheckSlidingModes(mode)) {
 //                debugLog("do close mode=" + mode.getDisplayName());
-                model.removeMode(mode);
+                model.removeMode(mode, false);
                 modeRemoved = true;
             }
         }
@@ -662,15 +679,15 @@ final class Central implements ControllerHandler {
     }
     
     // XXX TODO Model should handle this on its own.
-    private ModeImpl setSomeModeActive() {
+    private ModeImpl setSomeModeActive(NbWindowImpl window) {
         for(Iterator it = getModes().iterator(); it.hasNext(); ) {
             ModeImpl mode = (ModeImpl)it.next();
             if(!mode.getOpenedTopComponents().isEmpty() && Constants.MODE_KIND_SLIDING != mode.getKind()) {
-                model.setActiveMode(mode);
+                model.setActiveMode(window, mode);
                 return mode;
             }
         }
-        model.setActiveMode(null);
+        model.setActiveMode(window, null);
         return model.getActiveMode();
     }
 
@@ -828,7 +845,8 @@ final class Central implements ControllerHandler {
             return false;
         }
         
-        if( isViewMaximized() && mode.getKind() == Constants.MODE_KIND_SLIDING ) {
+        NbWindowImpl window = getWindowForMode(mode);
+        if( isViewMaximized(window) && mode.getKind() == Constants.MODE_KIND_SLIDING ) {
             //134622 - unslide first if some other view is maximized, otherwise
             //the view being closed will reopen in slidebar after restoring from maximized mode
             mode = unSlide(tc, mode);
@@ -841,14 +859,14 @@ final class Central implements ControllerHandler {
         ModeImpl oldActive = getActiveMode();
         ModeImpl newActive;
         if(model.getModeOpenedTopComponents(mode).isEmpty() && mode == oldActive) {
-            newActive = setSomeModeActive();
+            newActive = setSomeModeActive(window);
         } else {
             newActive = oldActive;
         }
 
         // Unmaximize mode if necessary.
-        if(getCurrentMaximizedMode() == mode && model.getModeOpenedTopComponents(mode).isEmpty()) {
-            switchMaximizedMode(null);
+        if(getCurrentMaximizedMode(window) == mode && model.getModeOpenedTopComponents(mode).isEmpty()) {
+            switchMaximizedMode(window, null);
         }
         
         if(isVisible() && opened) {
@@ -874,6 +892,10 @@ final class Central implements ControllerHandler {
         if(opened) {
             WindowManagerImpl.getInstance().notifyTopComponentClosed(tc);
         }
+        System.out.println("Central:addModeClosedTopComponent, at bottom is the mode empty=" + mode.isEmpty());
+        System.out.println("Mode=" + mode.getName());
+        System.out.println("Mode.openTopComponents=" + mode.getOpenedTopComponentsIDs().size());
+        System.out.println("Mode.closedTopComponents=" + mode.getClosedTopComponentsIDs().size());
         return true;
     }
 
@@ -907,6 +929,8 @@ final class Central implements ControllerHandler {
     
     /** Helper validation. */
     private boolean removeTopComponentFromOtherModes(ModeImpl mode, TopComponent tc) {
+        NbWindowImpl window = null;
+        
         boolean tcRemoved = false;
         for(Iterator it = model.getModes().iterator(); it.hasNext(); ) {
             ModeImpl m = (ModeImpl)it.next();
@@ -916,6 +940,8 @@ final class Central implements ControllerHandler {
             
             if(model.containsModeTopComponent(m, tc)) {
                 tcRemoved = true;
+                window = getWindowForMode(m);
+                
                 model.removeModeTopComponent(m, tc, null);
 //                debugLog("removeTopComponentFromOtherModes()");
 
@@ -928,7 +954,7 @@ final class Central implements ControllerHandler {
                         //do not let remove a mode whose only TC is just being maximized
                         && m != modeBeingMaximized ) {
 //                    debugLog("removeTopComponentFromOtherModes() - really removing=" + m.getDisplayName());
-                    model.removeMode(m);
+                    model.removeMode(m, false);
                     modeRemoved = true;
                 }
             
@@ -939,6 +965,20 @@ final class Central implements ControllerHandler {
             }
         }
         
+        if(window != null) {
+            // check to see if empty!
+            boolean isEmpty = true;
+            Set<ModeImpl> checkModes = model.getModesForWindow(window);
+            for(ModeImpl m: checkModes) {
+                if(!m.isEmpty()) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+            if(isEmpty)
+                destroyNbWindow(window);
+        }
+        
         return tcRemoved;
     }
     
@@ -947,6 +987,8 @@ final class Central implements ControllerHandler {
         if(!containsModeTopComponent(mode, tc)) {
             return false;
         }
+        
+        System.out.println("Central:removeModeTopComponent " + tc);
         
         boolean viewChange = getModeOpenedTopComponents(mode).contains(tc);
         
@@ -961,28 +1003,31 @@ final class Central implements ControllerHandler {
         }
         model.removeModeTopComponent(mode, tc, recentTc);
 
+        NbWindowImpl window = getWindowForMode(mode);
+
         ModeImpl oldActive = getActiveMode();
         ModeImpl newActive;
         if(model.getModeOpenedTopComponents(mode).isEmpty() && mode == oldActive) {
-            newActive = setSomeModeActive();
+            newActive = setSomeModeActive(window);
         } else {
             newActive = oldActive;
         }
 
         // Unmaximize mode if necessary.
-        if(getCurrentMaximizedMode() == mode && model.getModeOpenedTopComponents(mode).isEmpty()) {
-            switchMaximizedMode(null);
+        if(getCurrentMaximizedMode(window) == mode && model.getModeOpenedTopComponents(mode).isEmpty()) {
+            switchMaximizedMode(window, null);
         }
         
 //        debugLog("removeModeTopComponent()");
         // Remove mode from model if is not permanennt and emptied.
         boolean modeRemoved = false;
         if(!mode.isPermanent() && model.getModeTopComponents(mode).isEmpty()) {
+            System.out.println("IF THIS MODE IS EMPTY - REMOVE IT FROM THE MODEL - THIS leads to window closure?");
             // remove only if there's no other component in sliding modes that has this one as the previous mode.
             //TODO
             if (doCheckSlidingModes(mode)) {
 //                debugLog("removeModeTopComponent() -removing " + mode.getDisplayName());
-                model.removeMode(mode);
+                model.removeMode(mode, false);
                 modeRemoved = true;
             }
         }
@@ -1018,6 +1063,7 @@ final class Central implements ControllerHandler {
             WindowManagerImpl.notifyRegistryTopComponentActivated(
                 null);
         }
+        
         return true;
     }
     
@@ -1067,7 +1113,9 @@ final class Central implements ControllerHandler {
     
    // remove the mode only if there's no other component in sliding modes that has this one as the previous mode.
     boolean doCheckSlidingModes(ModeImpl mode) {
-        ModeImpl slid = model.getSlidingMode(Constants.BOTTOM);
+        NbWindowImpl window = model.getWindowForMode(mode);
+        
+        ModeImpl slid = model.getSlidingMode(window, Constants.BOTTOM);
         if (slid != null) {
             TopComponent[] tcs = slid.getTopComponents();
             for (int i = 0; i < tcs.length; i++) {
@@ -1078,7 +1126,7 @@ final class Central implements ControllerHandler {
                 }
             }
         }
-        slid = model.getSlidingMode(Constants.LEFT);
+        slid = model.getSlidingMode(window, Constants.LEFT);
         if (slid != null) {
             TopComponent[] tcs = slid.getTopComponents();
             for (int i = 0; i < tcs.length; i++) {
@@ -1089,7 +1137,7 @@ final class Central implements ControllerHandler {
                 }
             }
         }
-        slid = model.getSlidingMode(Constants.RIGHT);
+        slid = model.getSlidingMode(window, Constants.RIGHT);
         if (slid != null) {
             TopComponent[] tcs = slid.getTopComponents();
             for (int i = 0; i < tcs.length; i++) {
@@ -1100,7 +1148,7 @@ final class Central implements ControllerHandler {
                 }
             }
         }        
-        slid = model.getSlidingMode(Constants.TOP);
+        slid = model.getSlidingMode(window, Constants.TOP);
         if (slid != null) {
             TopComponent[] tcs = slid.getTopComponents();
             for (int i = 0; i < tcs.length; i++) {
@@ -1133,8 +1181,13 @@ final class Central implements ControllerHandler {
             return;
         }
         
-        if( isEditorMaximized() && isViewMaximized() )
-            switchMaximizedMode( null );
+        //TODO gwi-group: openGroup - is this only for main window?
+        
+        NbWindowImpl window = null; // TODO gwi-max: NEED TO GET WINDOW FOR THIS TOP COMPONENT GROUP!
+        
+        
+        if( isEditorMaximized(window) && isViewMaximized(window) )
+            switchMaximizedMode(window, null );
 
         Set<TopComponent> openedBeforeTopComponents = new HashSet<TopComponent>();
         Set<TopComponent> tcs = tcGroup.getTopComponents();
@@ -1155,7 +1208,7 @@ final class Central implements ControllerHandler {
                 ModeImpl mode = (ModeImpl)wm.findMode(tc);
                 if(mode == null) {
                     // Only view TopComponent is in group.
-                    mode = wm.getDefaultViewMode();
+                    mode = wm.getDefaultViewMode(window);
                 } else {
                     if( mode.getOpenedTopComponentsIDs().isEmpty() ) {
                         openedModes.add( mode );
@@ -1165,11 +1218,11 @@ final class Central implements ControllerHandler {
                 if (tc.getClientProperty(GROUP_SELECTED) != null) {
                     tc.requestVisible();
                 }                
-                if( isEditorMaximized() && mode.getState() != Constants.MODE_STATE_SEPARATED ) {
+                if( isEditorMaximized(window) && mode.getState() != Constants.MODE_STATE_SEPARATED ) {
                     String tcID = wm.findTopComponentID( tc );
-                    if( !isTopComponentDockedInMaximizedMode( tcID ) && mode.getKind() != Constants.MODE_KIND_SLIDING ) {
+                    if( !isTopComponentDockedInMaximizedMode(window, tcID ) && mode.getKind() != Constants.MODE_KIND_SLIDING ) {
                         //slide the TopComponent to edgebar and slide it out
-                        slide( tc, mode, getSlideSideForMode( mode ) );
+                        slide( tc, mode, getSlideSideForMode(window, mode ) );
                     }
                 }
                 openedTcs.add(tc);
@@ -1208,10 +1261,14 @@ final class Central implements ControllerHandler {
         if(!isGroupOpened(tcGroup)) {
             return;
         }
+        
+        // TODO gwi-group
 
-        if( isViewMaximized() ) {
+        NbWindowImpl window = null; // TODO gwi-max: NEED TO GET WINDOW FOR THIS TOP COMPONENT GROUP!
+
+        if( isViewMaximized(window) ) {
             //#222210
-            switchMaximizedMode( null );
+            switchMaximizedMode(window,  null );
         }
         
         Set tcs = tcGroup.getClosingSet();
@@ -1439,7 +1496,11 @@ final class Central implements ControllerHandler {
     public ModeImpl getActiveMode () {
         return model.getActiveMode();
     }
-    
+
+    public ModeImpl getActiveMode (NbWindowImpl window) {
+        return model.getActiveMode(window);
+    }
+
     /** Gets last active editor mode from model. */
     public ModeImpl getLastActiveEditorMode () {
         return model.getLastActiveEditorMode();
@@ -1451,8 +1512,8 @@ final class Central implements ControllerHandler {
     }
 
     /** Gets editor area constraints from model. */
-    public SplitConstraint[] getEditorAreaConstraints() {
-        return model.getEditorAreaConstraints();
+    public SplitConstraint[] getEditorAreaConstraints(NbWindowImpl window) {
+        return model.getEditorAreaConstraints(window);
     }
 
     /** Gets editor area state from model. */
@@ -1464,32 +1525,32 @@ final class Central implements ControllerHandler {
         return model.getEditorAreaFrameState();
     }
     
-    public Component getEditorAreaComponent() {
-        return viewRequestor.getEditorAreaComponent();
+    public Component getEditorAreaComponent(NbWindowImpl window) {
+        return viewRequestor.getEditorAreaComponent(window);
     }
 
     /** Gets mode that is currently maximized (can be an editor or view component). */
-    ModeImpl getCurrentMaximizedMode() {
-        if( isViewMaximized() )
-            return model.getViewMaximizedMode();
-        if( isEditorMaximized() )
-            return model.getEditorMaximizedMode();
+    ModeImpl getCurrentMaximizedMode(NbWindowImpl window) {
+        if( isViewMaximized(window) )
+            return model.getViewMaximizedMode(window);
+        if( isEditorMaximized(window) )
+            return model.getEditorMaximizedMode(window);
         return null;
     }
 
     /** Gets editor maximized mode. */
-    ModeImpl getEditorMaximizedMode() {
-        return model.getEditorMaximizedMode();
+    ModeImpl getEditorMaximizedMode(NbWindowImpl window) {
+        return model.getEditorMaximizedMode(window);
     }
 
     /** Gets view maximized mode. */
-    ModeImpl getViewMaximizedMode() {
-        return model.getViewMaximizedMode();
+    ModeImpl getViewMaximizedMode(NbWindowImpl window) {
+        return model.getViewMaximizedMode(window);
     }
     
     /** Gets constraints for mode from model. */
-    public SplitConstraint[] getModeConstraints(ModeImpl mode) {
-        return model.getModeConstraints(mode);
+    public SplitConstraint[] getModeConstraints(NbWindowImpl window, ModeImpl mode) {
+        return model.getModeConstraints(window, mode);
     }
 
 
@@ -1518,8 +1579,8 @@ final class Central implements ControllerHandler {
     }
     
     /** Gets side. */
-    public String getModeSide(ModeImpl mode) {
-        return model.getModeSide(mode);
+    public String getModeSide(NbWindowImpl window, ModeImpl mode) {
+        return model.getModeSide(window, mode);
     }
     
     /** Gets frame state. */
@@ -1695,37 +1756,37 @@ final class Central implements ControllerHandler {
      * @param permanent
      * @return 
      */
-    ModeImpl attachModeToSide( ModeImpl referenceMode, String side, String modeName, int modeKind, boolean permanent ) {
+    ModeImpl attachModeToSide(NbWindowImpl window, ModeImpl referenceMode, String side, String modeName, int modeKind, boolean permanent ) {
         ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(modeName, modeKind, permanent);
         
-        model.addModeToSide(newMode, referenceMode, side);
+        model.addModeToSide(window, newMode, referenceMode, side);
         
         return newMode;
     }
 
     /** Creates new mode on side of specified one and puts there the TopComponentS. */
-    private ModeImpl attachModeToSide(ModeImpl attachMode, String side, int modeKind) {
-        return attachModeToSide( attachMode, side, ModeImpl.getUnusedModeName(), modeKind, false);
+    private ModeImpl attachModeToSide(NbWindowImpl window, ModeImpl attachMode, String side, int modeKind) {
+        return attachModeToSide(window, attachMode, side, ModeImpl.getUnusedModeName(), modeKind, false);
     }
 
     /** Creates new mode on side of desktop */
-    private ModeImpl attachModeAroundDesktop(String side) {
+    private ModeImpl attachModeAroundDesktop(NbWindowImpl window, String side) {
         // New mode. It is necessary to add it yet.
         ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(
             ModeImpl.getUnusedModeName(), Constants.MODE_KIND_VIEW, false);
 
-        model.addModeAround(newMode, side);
+        model.addModeAround(window, newMode, side);
         
         return newMode;
     }
     
     /** Creates new mode on side of editor area and puts there the TopComponentS. */
-    private ModeImpl attachModeAroundEditor(String side, int modeKind) {
+    private ModeImpl attachModeAroundEditor(NbWindowImpl window, String side, int modeKind) {
         // New mode. It is necessary to add it yet.
         ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(
             ModeImpl.getUnusedModeName(), modeKind, false);
 
-        model.addModeAroundEditor(newMode, side);
+        model.addModeAroundEditor(window, newMode, side);
 
         return newMode;
     }
@@ -1737,7 +1798,7 @@ final class Central implements ControllerHandler {
             ModeImpl.getUnusedModeName(), modeKind, Constants.MODE_STATE_SEPARATED, false);
         newMode.setBounds(bounds);
         
-        model.addMode(newMode, new SplitConstraint[] {new SplitConstraint(Constants.HORIZONTAL, 100, 0.5f)});
+        model.addMode(null, newMode, new SplitConstraint[] {new SplitConstraint(Constants.HORIZONTAL, 100, 0.5f)});  
 
         return newMode;
     }
@@ -1765,7 +1826,8 @@ final class Central implements ControllerHandler {
                 }
             }
         }
-        model.setActiveMode(mode);
+        NbWindowImpl window = getWindowForMode(mode);
+        model.setActiveMode(window, mode);
         model.setModeSelectedTopComponent(mode, tc);
         
         if(isVisible()) {
@@ -1801,7 +1863,6 @@ final class Central implements ControllerHandler {
             if( !newActiveMode.equals(mode)
                 && mode.getKind() == Constants.MODE_KIND_SLIDING
                 && null != mode.getSelectedTopComponent() ) {
-                
                 setModeSelectedTopComponent( mode, null );
             }
         }
@@ -1830,8 +1891,8 @@ final class Central implements ControllerHandler {
      * @param mode Mode
      * @return The slide side for TopComponents from the given mode.
      */
-    String getSlideSideForMode(ModeImpl mode) {
-        return model.getSlideSideForMode( mode );
+    String getSlideSideForMode(NbWindowImpl window, ModeImpl mode) {
+        return model.getSlideSideForMode( window, mode );
     }
 
     /** Tells whether given top component is inside joined mode (in main window)
@@ -1899,7 +1960,7 @@ final class Central implements ControllerHandler {
             }
         }
         
-        ModeImpl mode = wm.getDefaultEditorMode();
+        ModeImpl mode = wm.getDefaultEditorMode(null);  // GWI null window
         if(mode != null && !mode.getOpenedTopComponents().isEmpty()) {
             setActiveMode(mode);
         } else {
@@ -1951,7 +2012,7 @@ final class Central implements ControllerHandler {
     public void userResizedModeBounds(ModeImpl mode, Rectangle bounds) {
         Rectangle old = model.getModeBounds(mode);
         model.setModeBounds(mode, bounds);
-        
+               
         mode.doFirePropertyChange(ModeImpl.PROP_BOUNDS, old, bounds);
     }
     
@@ -1980,14 +2041,15 @@ final class Central implements ControllerHandler {
     }
     
     @Override
-    public void userChangedSplit( ModelElement[] snapshots, double[] splitWeights ) {
-        model.setSplitWeights( snapshots, splitWeights );
+    public void userChangedSplit(NbWindowImpl window, ModelElement[] snapshots, double[] splitWeights ) {
+        model.setSplitWeights( window, snapshots, splitWeights );
     }
 
     @Override
     public void userClosedTopComponent(ModeImpl mode, TopComponent tc) {
-        if( mode == getCurrentMaximizedMode() && isViewMaximized() ) {
-            switchMaximizedMode( null );
+        NbWindowImpl window = getWindowForMode(mode);
+        if( mode == getCurrentMaximizedMode(window) && isViewMaximized(window) ) {
+            switchMaximizedMode(window, null );
             for(Iterator it = getModes().iterator(); it.hasNext(); ) {
                 ModeImpl newMode = (ModeImpl)it.next();
 
@@ -2068,9 +2130,9 @@ final class Central implements ControllerHandler {
         return null;
     }
     
-    @Override
     public void userClosedMode(ModeImpl mode) {
         if(mode != null) {
+            NbWindowImpl window = getWindowForMode(mode);
             boolean allAreClosable = true;
             for( TopComponent tc : mode.getOpenedTopComponents() ) {
                 if( !Switches.isClosingEnabled(tc) ) {
@@ -2091,9 +2153,9 @@ final class Central implements ControllerHandler {
             }
             // Unmaximize if necessary.
             if(mode.getOpenedTopComponents().isEmpty()
-                && mode == getCurrentMaximizedMode()) 
+                && mode == getCurrentMaximizedMode(window)) 
             {
-                switchMaximizedMode(null);
+                switchMaximizedMode(window, null);
             }
         }
         
@@ -2102,21 +2164,24 @@ final class Central implements ControllerHandler {
     
     // DnD
     @Override
-    public void userDroppedTopComponents(ModeImpl mode, TopComponentDraggable draggable) {
+    public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable) {
         boolean unmaximize = false;
         if( draggable.isTopComponentTransfer() ) {
             unmaximize = moveTopComponentIntoMode( mode, draggable.getTopComponent() );
+            System.out.print("User Dropped Top Componentns into mode " + mode);
         } else {
             TopComponent selTC = draggable.getMode().getSelectedTopComponent();
             mergeModes( draggable.getMode(), mode, -1 );
             if( null != selTC )
                 mode.setSelectedTopComponent( selTC );
         }
-        updateViewAfterDnD(unmaximize);
+        //NbWindowImpl window = getWindowForMode(mode);
+        updateViewAfterDnD(null, unmaximize);
+        updateViewAfterDnD(window, unmaximize);
     }
     
     @Override
-    public void userDroppedTopComponents(ModeImpl mode, TopComponentDraggable draggable, int index) {
+    public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable, int index) {
         boolean unmaximize = false;
         if( draggable.isTopComponentTransfer() ) {
             unmaximize = moveTopComponentIntoMode( mode, draggable.getTopComponent(), index );
@@ -2126,12 +2191,13 @@ final class Central implements ControllerHandler {
             if( null != selTC )
                 mode.setSelectedTopComponent( selTC );
         }
-        updateViewAfterDnD(unmaximize);
+        //NbWindowImpl window = getWindowForMode(mode);
+        updateViewAfterDnD(window, unmaximize);
     }
     
     @Override
-    public void userDroppedTopComponents(ModeImpl mode, TopComponentDraggable draggable, String side) {
-        ModeImpl newMode = attachModeToSide( mode, side, mode.getKind() );
+    public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable, String side) {
+        ModeImpl newMode = attachModeToSide(window, mode, side, mode.getKind() );
         if( draggable.isTopComponentTransfer() ) {
             moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
         } else {
@@ -2142,13 +2208,16 @@ final class Central implements ControllerHandler {
             }
         }
         
-        updateViewAfterDnD(true);
+        updateViewAfterDnD(window, true);
     }
     
     @Override
-    public void userDroppedTopComponentsIntoEmptyEditor(TopComponentDraggable draggable) {
+    public void userDroppedTopComponentsIntoEmptyEditor(NbWindowImpl window, TopComponentDraggable draggable) {
         // PENDING
-        ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode("editor"); // NOI18N
+        String editorModeName = "editor";
+        if(window instanceof NbWindowImpl)
+            editorModeName = window.getName() + "_editor";
+        ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(editorModeName); // NOI18N
         if( null == mode || mode.getState() == Constants.MODE_STATE_SEPARATED ) {
             for( ModeImpl m : getModes() ) {
                 if( m.getKind() == Constants.MODE_KIND_EDITOR && m.getState() == Constants.MODE_STATE_JOINED ) {
@@ -2157,6 +2226,8 @@ final class Central implements ControllerHandler {
                 }
             }
         }
+        
+        
         if( null == mode || mode == draggable.getMode() ) {
             if( draggable.isModeTransfer() && draggable.getMode().getKind() == Constants.MODE_KIND_EDITOR ) {
                 userDockedMode( draggable.getMode() );
@@ -2172,42 +2243,91 @@ final class Central implements ControllerHandler {
                 dockMode( mode, draggable.getMode() );
             }
         }
-        updateViewAfterDnD(true);
+        updateViewAfterDnD(window, true);
     }
     
     @Override
-    public void userDroppedTopComponentsAround(TopComponentDraggable draggable, String side) {
-        ModeImpl newMode = attachModeAroundDesktop( side );
+    public void userDroppedTopComponentsAround(NbWindowImpl window, TopComponentDraggable draggable, String side) {
+        ModeImpl newMode = attachModeAroundDesktop(window, side );
         if( draggable.isTopComponentTransfer() ) {
             moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
         } else {
             dockMode( newMode, draggable.getMode() );
         }
 
-        updateViewAfterDnD(true);
+        //NbWindowImpl window = getWindowForMode(newMode);
+        updateViewAfterDnD(window, true);
     }
     
     @Override
-    public void userDroppedTopComponentsAroundEditor(TopComponentDraggable draggable, String side) {
-        ModeImpl newMode = attachModeAroundEditor( side, draggable.getKind() );
+    public void userDroppedTopComponentsAroundEditor(NbWindowImpl window, TopComponentDraggable draggable, String side) {
+        ModeImpl newMode = attachModeAroundEditor(window, side, draggable.getKind() );
         if( draggable.isTopComponentTransfer() ) {
             moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
         } else {
             dockMode( newMode, draggable.getMode() );
         }
-        updateViewAfterDnD(true);
+        updateViewAfterDnD(window, true);
     }
     
     @Override
     public void userDroppedTopComponentsIntoFreeArea(TopComponentDraggable draggable, Rectangle bounds) {
+        NbWindowImpl window = null;
         if( draggable.isTopComponentTransfer() ) {
-            ModeImpl newMode = createFloatingMode( bounds, draggable.getKind() );
-            moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
-            newMode.setSelectedTopComponent( draggable.getTopComponent() );
+            if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+                TopComponent tc = draggable.getTopComponent();
+                
+                Collection<? extends NbWindowSelector> selectors = Lookup.getDefault().lookupAll(NbWindowSelector.class);
+                Boolean isDialogRequested = null;
+                for (NbWindowSelector s : selectors) {
+                    isDialogRequested = s.isDialogRequested(tc);
+                    if(isDialogRequested != null) {
+                        break;
+                    }                
+                }
+                                
+                String nbWindowName = getUnusedNbWindowName();
+                window = (NbWindowImpl)WindowManagerImpl.getInstance().createNbWindow(nbWindowName, bounds, Boolean.TRUE.equals(isDialogRequested)); 
+
+            // a  nbwindow name can be changed via setName - ? Should that be allowed ? Should we also have a UID?
+            ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_editor", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true);  
+            model.addMode(window, newMode, new SplitConstraint[0]);
+
+            ModeImpl newMode2 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_bottomSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
+            model.addSlidingMode(window, newMode2, "bottom", null);
+
+            ModeImpl newMode3 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_rightSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
+            model.addSlidingMode(window, newMode3, "right", null);
+
+            ModeImpl newMode4 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_leftSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
+            model.addSlidingMode(window, newMode4, "left", null);
+
+            ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true); 
+            model.addSlidingMode(window, newMode5, "top", null);
+                
+                
+               
+                // move top component into mode
+                ModeImpl nbWindowMode = null;
+                String name = nbWindowName + "_editor";
+                for (ModeImpl m : getModes()) {
+                    if (m.getName().equals(name)) {
+                        nbWindowMode = m;
+                        break;
+                    }
+                }
+                moveTopComponentIntoMode(nbWindowMode, draggable.getTopComponent());
+                nbWindowMode.setSelectedTopComponent(draggable.getTopComponent());
+            } else {
+                ModeImpl newMode = createFloatingMode( bounds, draggable.getKind() );
+                moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
+                newMode.setSelectedTopComponent( draggable.getTopComponent() );
+                window = null;
+            }
         } else {
             userUndockedMode( draggable.getMode(), bounds );
         }
-        updateViewAfterDnD(false);
+        updateViewAfterDnD(window, false);
     }
 
     /**
@@ -2216,8 +2336,9 @@ final class Central implements ControllerHandler {
      * @since 2.30
      */
     public void userUndockedMode( ModeImpl mode ) {
-        if (getCurrentMaximizedMode() == mode) {
-            switchMaximizedMode(null);
+        NbWindowImpl window = getWindowForMode(mode);
+        if (getCurrentMaximizedMode(window) == mode) {
+            switchMaximizedMode(window, null);
         }
         Rectangle modeBounds = null;
         TopComponent tc = mode.getSelectedTopComponent();
@@ -2236,25 +2357,45 @@ final class Central implements ControllerHandler {
         if (modeKind == Constants.MODE_KIND_SLIDING) {
             modeKind = Constants.MODE_KIND_VIEW;
         }
-        if (getCurrentMaximizedMode() == mode) {
-            switchMaximizedMode(null);
-        }
-        if( null != modeBounds ) {
-            model.setModeBounds( mode, modeBounds );
+        NbWindowImpl window = getWindowForMode(mode);
+        if (getCurrentMaximizedMode(window) == mode) {
+            switchMaximizedMode(window, null);
         }
         
-        SplitConstraint[] constraints = mode.getConstraints();
-        model.setModeState( mode, Constants.MODE_STATE_SEPARATED );
-        
-        ModeImpl previousMode = WindowManagerImpl.getInstance().createMode( null, mode.getKind(), Constants.MODE_STATE_JOINED, true, constraints);
-        constraints = previousMode.getConstraints();
-        List<String> openedIDs = mode.getOpenedTopComponentsIDs();
-        for( String tcID : getModeTopComponentsIDs( mode ) ) {
-            model.setModeTopComponentPreviousMode(mode, tcID, previousMode, openedIDs.indexOf( tcID ));
-            model.setModeTopComponentPreviousConstraints(mode, tcID, constraints);
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            // new behavior - create a nbwindow
+            String nbWindowName = getUnusedNbWindowName();
+            //TODO gwi-window: Need a way to determine if we need a frame or a dialog
+            WindowManagerImpl.getInstance().createNbWindow(nbWindowName, modeBounds, false); // do I need to adjust size  to accomodate frame?
+
+            ModeImpl nbMode = null;
+            String name = nbWindowName + "_editor";
+            for (ModeImpl m : getModes()) {
+                if (m.getName().equals(name)) {
+                    nbMode = m;
+                    break;
+                }
+            }            
+            mergeModes(mode, nbMode, modeKind);
+        } else {
+            // original behavior
+            if( null != modeBounds ) {
+                model.setModeBounds( mode, modeBounds );
+            }
+
+            SplitConstraint[] constraints = mode.getConstraints();
+            model.setModeState( mode, Constants.MODE_STATE_SEPARATED );
+
+            ModeImpl previousMode = WindowManagerImpl.getInstance().createMode(null, null, mode.getKind(), Constants.MODE_STATE_JOINED, true, constraints);
+            constraints = previousMode.getConstraints();
+            List<String> openedIDs = mode.getOpenedTopComponentsIDs();
+            for( String tcID : getModeTopComponentsIDs( mode ) ) {
+                model.setModeTopComponentPreviousMode(mode, tcID, previousMode, openedIDs.indexOf( tcID ));
+                model.setModeTopComponentPreviousConstraints(mode, tcID, constraints);
+            }
+            model.setModeConstraints(window, mode, new SplitConstraint[0] );
         }
-        model.setModeConstraints( mode, new SplitConstraint[0] );
-        updateViewAfterDnD(false);
+        updateViewAfterDnD(window, false);
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -2269,7 +2410,8 @@ final class Central implements ControllerHandler {
         if (modeKind == Constants.MODE_KIND_SLIDING) {
             modeKind = Constants.MODE_KIND_VIEW;
         }
-        switchMaximizedMode(null);
+        NbWindowImpl window = getWindowForMode(mode);
+        switchMaximizedMode(window, null);
 
         TopComponent selectedTC = mode.getSelectedTopComponent();
 
@@ -2292,7 +2434,7 @@ final class Central implements ControllerHandler {
                 if( null == previousMode ) {
                     SplitConstraint[] constraints = model.getModeTopComponentPreviousConstraints( mode, tcID );
                     if( null != constraints )
-                        model.setModeConstraints( mode, constraints );
+                        model.setModeConstraints(window, mode, constraints );
                     model.setModeState( mode, Constants.MODE_STATE_JOINED );
                 } else {
                     if( previousMode.isPermanent() && !previousMode.getTopComponentsIDs().isEmpty() ) {
@@ -2313,12 +2455,12 @@ final class Central implements ControllerHandler {
                 SplitConstraint[] constraints = mode.getConstraints();
                 if( null == constraints || constraints.length == 0 ) {
                     //just a fallback, it shouldn't really happen
-                    model.setModeConstraints( mode, new SplitConstraint[] { new SplitConstraint( Constants.HORIZONTAL, 0, 0.2) } );
+                    model.setModeConstraints(window, mode, new SplitConstraint[] { new SplitConstraint( Constants.HORIZONTAL, 0, 0.2) } );
                 }
                 model.setModeState( mode, Constants.MODE_STATE_JOINED );
             }
         }
-        updateViewAfterDnD(false);
+        updateViewAfterDnD(window, false);
         if( null != selectedTC )
             selectedTC.requestActive();
         WindowManagerImpl.getInstance().doFirePropertyChange(
@@ -2356,7 +2498,7 @@ final class Central implements ControllerHandler {
                 tmpIndex++;
             TopComponentTracker.getDefault().add( tc, target );
         }
-        if( source.isPermanent() ) {
+        if(source.isPermanent()) {
             target.addOtherName( source.getName() );
             for( String otherName : source.getOtherNames() ) {
                 target.addOtherName( otherName );
@@ -2368,7 +2510,7 @@ final class Central implements ControllerHandler {
             setPreviousMode( target, prevMode );
             setPreviousConstraints( target, prevConstraints );
         }
-        model.removeMode( source );
+        model.removeMode( source, false );
     }
     
     /**
@@ -2445,7 +2587,7 @@ final class Central implements ControllerHandler {
         setPreviousMode( floatingMode, null );
         setPreviousConstraints( floatingMode, null );
         if( null != floatingPrevMode && floatingPrevMode.getTopComponentsIDs().isEmpty() ) {
-            model.removeMode( floatingPrevMode );
+            model.removeMode( floatingPrevMode, false );
         }
     }
 
@@ -2454,10 +2596,10 @@ final class Central implements ControllerHandler {
      * @param mode 
      * @since 2.30
      */
-    void userMinimizedMode( ModeImpl mode ) {
+    void userMinimizedMode(NbWindowImpl window, ModeImpl mode ) {
         List<TopComponent> opened = mode.getOpenedTopComponents();
         TopComponent selTc = mode.getSelectedTopComponent();
-        String side = getSlideSideForMode( mode );
+        String side = getSlideSideForMode(window, mode );
         for( TopComponent tc : opened ) {
             slide( tc, mode, side );
         }
@@ -2482,7 +2624,7 @@ final class Central implements ControllerHandler {
      * @param modeToRestore 
      * @since 2.35
      */
-    void userRestoredMode( ModeImpl slidingMode, ModeImpl modeToRestore ) {
+    void userRestoredMode(ModeImpl slidingMode, ModeImpl modeToRestore ) {
         TopComponent tcToSelect = modeToRestore.getPreviousSelectedTopComponent();
         setModeMinimized( modeToRestore, false );
         WindowManagerImpl wm = WindowManagerImpl.getInstance();
@@ -2516,14 +2658,38 @@ final class Central implements ControllerHandler {
             modeKind = Constants.MODE_KIND_VIEW;
         }
         // #81479: unmaximize only if desirable
-        if (getCurrentMaximizedMode() == mode &&
+        NbWindowImpl window = getWindowForMode(mode);
+        if (getCurrentMaximizedMode(window) == mode &&
             mode.getOpenedTopComponents().size() == 1 &&
             mode.getOpenedTopComponents().get(0) == tc) {
-            switchMaximizedMode(null);
+            switchMaximizedMode(window, null);
         }
-        ModeImpl newMode = createFloatingMode( bounds, modeKind );
-        moveTopComponentIntoMode( newMode, tc );
-        updateViewAfterDnD(false);
+        
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            // new behavior - create a nbwindow
+            String nbWindowName = getUnusedNbWindowName();
+            // TODO gwi-window: Need a way to determine frame or dialog
+            WindowManagerImpl.getInstance().createNbWindow(nbWindowName, bounds, false);
+            
+            // need to create default modes!
+
+            // move top component into mode
+            ModeImpl nbMode = null;
+            String name = nbWindowName + "_editor";
+            for (ModeImpl m : getModes()) {
+                if (m.getName().equals(name)) {
+                    nbMode = m;
+                    break;
+                }
+            }
+            moveTopComponentIntoMode(nbMode, tc);
+            nbMode.setSelectedTopComponent(tc);
+        } else {
+            // original behavior create a floating mode
+            ModeImpl newMode = createFloatingMode( bounds, modeKind );
+            moveTopComponentIntoMode( newMode, tc );
+        }
+        updateViewAfterDnD(window, false);
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -2548,19 +2714,21 @@ final class Central implements ControllerHandler {
                     // create mode with the same constraints to dock topcomponent back into
                     dockTo = WindowManagerImpl.getInstance().createModeImpl(
                             ModeImpl.getUnusedModeName(), modeKind, false);
-                    model.addMode(dockTo, constraints);
+                    model.addMode(null, dockTo, constraints);  // TODO gwi: user docked top component will use main window?
                 }
             }
         }
         
         if (dockTo == null) {
+            JOptionPane.showMessageDialog(null, "What window to use?");
             // fallback, previous saved mode not found somehow, use default modes
             dockTo = modeKind == Constants.MODE_KIND_EDITOR
-                    ? WindowManagerImpl.getInstance().getDefaultEditorMode()
-                    : WindowManagerImpl.getInstance().getDefaultViewMode();
+                    ? WindowManagerImpl.getInstance().getDefaultEditorMode(null) //TODO gwi: WHAT WINDOW TO USE?
+                    : WindowManagerImpl.getInstance().getDefaultViewMode(null);  //TODO gwi: WHAT WINDOW TO USE?
         }
         moveTopComponentIntoMode(dockTo, tc, dockIndex);
-        updateViewAfterDnD(false);
+        NbWindowImpl window = getWindowForMode(dockTo);
+        updateViewAfterDnD(window, false);
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -2647,12 +2815,16 @@ final class Central implements ControllerHandler {
                 }
             }
             // remember previous mode and constraints for precise de-auto-hide
+            NbWindowImpl window = getWindowForMode(prevMode);
             model.setModeTopComponentPreviousMode(mode, tcID, prevMode, prevIndex);
-            model.setModeTopComponentPreviousConstraints(mode, tcID, model.getModeConstraints(prevMode));
+            model.setModeTopComponentPreviousConstraints(mode, tcID, model.getModeConstraints(window, prevMode));
         }
+        
+        NbWindowImpl window = getWindowForMode(mode);
+        
         if (!intoSliding) {
             // make the target mode active after dragging..
-            model.setActiveMode(mode);
+            model.setActiveMode(window, mode);
             model.setModeSelectedTopComponent(mode, tc);
         } else {
             sortSlidedOutTopComponentsByPrevModes( mode );
@@ -2660,7 +2832,7 @@ final class Central implements ControllerHandler {
             // make some other desktop mode active
             if(prevMode != null && prevMode == getActiveMode() 
                    && prevMode.getOpenedTopComponents().isEmpty()) {
-                setSomeModeActive();
+                setSomeModeActive(window);
             }
             // check the drop mode if it was already used, if not, assign it some reasonable size, 
             // according to the current component.
@@ -2684,9 +2856,9 @@ final class Central implements ControllerHandler {
         List<String> opened = slidingMode.getOpenedTopComponentsIDs();
     }
     
-    private void updateViewAfterDnD(boolean unmaximize) {
+    private void updateViewAfterDnD(NbWindowImpl window, boolean unmaximize) {
         if( unmaximize ) {
-            switchMaximizedMode(null);
+            switchMaximizedMode(window, null);
         }
         
         if(isVisible()) {
@@ -2700,8 +2872,10 @@ final class Central implements ControllerHandler {
     // Sliding
     
    /** Adds mode into model and requests view (if needed). */
-    public void addSlidingMode(ModeImpl mode, ModeImpl original, String side, Map<String,Integer> slideInSizes) {
-        ModeImpl targetMode = model.getSlidingMode(side);
+    public void addSlidingMode(NbWindowImpl window, ModeImpl mode, ModeImpl original, String side, Map<String,Integer> slideInSizes) {
+//        NbWindowImpl window = model.getWindowForMode(mode);
+        
+        ModeImpl targetMode = model.getSlidingMode(window, side);
         if (targetMode != null) {
             //TODO what to do here.. something there already
             return;
@@ -2709,7 +2883,7 @@ final class Central implements ControllerHandler {
             targetMode = WindowManagerImpl.getInstance().createModeImpl(
                 ModeImpl.getUnusedModeName(), Constants.MODE_KIND_SLIDING, false);
         
-        model.addSlidingMode(mode, side, slideInSizes);
+        model.addSlidingMode(window, mode, side, slideInSizes);
         
         if(isVisible()) {
             viewRequestor.scheduleRequest(
@@ -2722,12 +2896,16 @@ final class Central implements ControllerHandler {
     
     @Override
     public void userEnabledAutoHide(TopComponent tc, ModeImpl source, String targetSide) {
-        if( isViewMaximized() )
-            switchMaximizedMode( null );
+        JOptionPane.showMessageDialog(null, "userEnabledAutoHide");
+        ModeImpl mode = (ModeImpl)WindowManager.getDefault().findMode(tc);
+        NbWindowImpl window = getWindowForMode(mode);
+        
+        if( isViewMaximized(window) )
+            switchMaximizedMode(window, null );
 
         String tcID = WindowManagerImpl.getInstance().findTopComponentID(tc);        
-        if( isEditorMaximized() )
-            setTopComponentDockedInMaximizedMode( tcID, false );
+        if( isEditorMaximized(window) )
+            setTopComponentDockedInMaximizedMode(window, tcID, false );
     
         slide( tc, source, targetSide );
     }
@@ -2736,11 +2914,13 @@ final class Central implements ControllerHandler {
      * Slide out the given TopComponent
      */
     void slide(TopComponent tc, ModeImpl source, String targetSide) {
-        ModeImpl targetMode = model.getSlidingMode(targetSide);
+        NbWindowImpl window = model.getWindowForMode(source);
+        
+        ModeImpl targetMode = model.getSlidingMode(window, targetSide);
         if (targetMode == null) {
             targetMode = WindowManagerImpl.getInstance().createModeImpl(
                 ModeImpl.getUnusedModeName(), Constants.MODE_KIND_SLIDING, false);
-            model.addSlidingMode(targetMode, targetSide, null);
+            model.addSlidingMode(window, targetMode, targetSide, null);
             model.setModeBounds(targetMode, new Rectangle(tc.getBounds()));
         }
 
@@ -2772,7 +2952,7 @@ final class Central implements ControllerHandler {
     public void userResizedSlidingMode(ModeImpl mode, Rectangle rect) {
         model.setModeBounds(mode, new Rectangle(rect));
         //remember user's settings for the slided-in TopComponent size
-        String side = model.getSlidingModeConstraints( mode );
+        String side = model.getSlidingModeConstraints( getWindowForMode(mode), mode );
         model.setSlideInSize( side, 
                 mode.getSelectedTopComponent(), 
                 Constants.BOTTOM.equals( side ) || Constants.TOP.equals(side) ? rect.height : rect.width );
@@ -2785,14 +2965,17 @@ final class Central implements ControllerHandler {
     
     @Override
     public void userDisabledAutoHide(TopComponent tc, ModeImpl source) {
+        ModeImpl mode = (ModeImpl)WindowManager.getDefault().findMode(tc);
+        NbWindowImpl window = getWindowForMode(mode);
+
         // unmaximize if needed
-        if( isViewMaximized() ) {
-            switchMaximizedMode(null);
+        if( isViewMaximized(window) ) {
+            switchMaximizedMode(window, null);
         }
         
         String tcID = WindowManagerImpl.getInstance().findTopComponentID(tc);        
-        if( isEditorMaximized() )
-            setTopComponentDockedInMaximizedMode( tcID, true );
+        if( isEditorMaximized(window) )
+            setTopComponentDockedInMaximizedMode(window, tcID, true );
         
         unSlide( tc, source );
     }
@@ -2813,15 +2996,15 @@ final class Central implements ControllerHandler {
                 // create mode with the same constraints to dock topcomponent back into
                 targetMode = WindowManagerImpl.getInstance().createModeImpl(
                         ModeImpl.getUnusedModeName(), source.getKind(), false);
-                model.addMode(targetMode, constraints);
+                model.addMode(getWindowForMode(targetMode), targetMode, constraints); 
             }
         }
 
         if (targetMode == null) {
             // fallback, previous saved mode not found somehow, use default modes
             targetMode = source.getKind() == Constants.MODE_KIND_EDITOR
-                    ? WindowManagerImpl.getInstance().getDefaultEditorMode()
-                    : WindowManagerImpl.getInstance().getDefaultViewMode();
+                    ? WindowManagerImpl.getInstance().getDefaultEditorMode(null)
+                    : WindowManagerImpl.getInstance().getDefaultViewMode(null);
         }
 
         moveTopComponentIntoMode(targetMode, tc, targetIndex);
@@ -2829,7 +3012,7 @@ final class Central implements ControllerHandler {
         targetMode.setMinimized( false );
         
         if (source.isEmpty()) {
-            model.removeMode(source);
+            model.removeMode(source, false);
         }
         
         if(isVisible()) {
@@ -2907,11 +3090,11 @@ final class Central implements ControllerHandler {
      * @param docked True if the TopComponent should stay docked in maximized editor mode,
      * false if it should slide out when the editor is maximized.
      */
-    void setTopComponentDockedInMaximizedMode( String tcID, boolean docked ) {
+    void setTopComponentDockedInMaximizedMode(NbWindowImpl window, String tcID, boolean docked ) {
         if( docked )
-            model.getMaximizedDockingStatus().addDocked( tcID );
+            model.getMaximizedDockingStatus(window).addDocked( tcID );
         else
-            model.getMaximizedDockingStatus().addSlided( tcID );
+            model.getMaximizedDockingStatus(window).addSlided( tcID );
     }
     
     /**
@@ -2921,8 +3104,8 @@ final class Central implements ControllerHandler {
      * @return True if the TopComponent should stay docked in maximized editor mode,
      * false if it should slide out when the editor is maximized.
      */
-    boolean isTopComponentDockedInMaximizedMode( String tcID ) {
-        return model.getMaximizedDockingStatus().isDocked( tcID );
+    boolean isTopComponentDockedInMaximizedMode(NbWindowImpl window, String tcID ) {
+        return model.getMaximizedDockingStatus(window).isDocked( tcID );
     }
     
     /**
@@ -2932,11 +3115,11 @@ final class Central implements ControllerHandler {
      * @param slided True if the TopComponent is slided in the default mode,
      * false if it is docked.
      */
-    void setTopComponentSlidedInDefaultMode( String tcID, boolean slided ) {
+    void setTopComponentSlidedInDefaultMode(NbWindowImpl window, String tcID, boolean slided ) {
         if( slided )
-            model.getDefaultDockingStatus().addSlided( tcID );
+            model.getDefaultDockingStatus(window).addSlided( tcID );
         else
-            model.getDefaultDockingStatus().addDocked( tcID );
+            model.getDefaultDockingStatus(window).addDocked( tcID );
     }
     
     /**
@@ -2964,9 +3147,10 @@ final class Central implements ControllerHandler {
         if( isVisible() ) {
             TopComponent tc = WindowManagerImpl.getInstance().findTopComponent( tcID );
             ModeImpl mode = WindowManagerImpl.getInstance().findModeForOpenedID( tcID );
-            if( null != tc && null != mode && null != mode.getSide() ) {
+            NbWindowImpl window = getWindowForMode(mode);
+            if( null != tc && null != mode && null != mode.getSide(window) ) {
                 viewRequestor.scheduleRequest (
-                    new ViewRequest(tc, View.CHANGE_MAXIMIZE_TOPCOMPONENT_SLIDE_IN, null, mode.getSide()));
+                    new ViewRequest(tc, View.CHANGE_MAXIMIZE_TOPCOMPONENT_SLIDE_IN, null, mode.getSide(window)));
             }
         }
     }
@@ -2978,24 +3162,24 @@ final class Central implements ControllerHandler {
      * @return True if the TopComponent is slided in the default mode,
      * false if it is docked.
      */
-    boolean isTopComponentSlidedInDefaultMode( String tcID ) {
-        return model.getDefaultDockingStatus().isSlided( tcID );
+    boolean isTopComponentSlidedInDefaultMode(NbWindowImpl window, String tcID ) {
+        return model.getDefaultDockingStatus(window).isSlided( tcID );
     }
     
-    boolean isEditorMaximized() {
-        return null != model.getEditorMaximizedMode();
+    boolean isEditorMaximized(NbWindowImpl window) {
+        return null != model.getEditorMaximizedMode(window);
     }
     
-    boolean isViewMaximized() {
-        return null != model.getViewMaximizedMode();
+    boolean isViewMaximized(NbWindowImpl window) {
+        return null != model.getViewMaximizedMode(window);
     }
     
     /**
      * Slide-out or dock opened TopComponent according to their previous state.
      */
-    private void restoreViews( DockingStatus viewStatus ) {
+    private void restoreViews(NbWindowImpl window, DockingStatus viewStatus ) {
         WindowManagerImpl wm = WindowManagerImpl.getInstance();
-        Set<? extends Mode> modes = getModes();
+        Set<? extends Mode> modes = model.getModesForWindow(window);
         for( Iterator<? extends Mode> i=modes.iterator(); i.hasNext(); ) {
             ModeImpl modeImpl = (ModeImpl)i.next();
             if( modeImpl.getState() == Constants.MODE_STATE_SEPARATED )
@@ -3043,15 +3227,17 @@ final class Central implements ControllerHandler {
     /**
      * Slide out all non-editor TopComponents.
      */
-    private void slideAllViews() {
+    private void slideAllViews(NbWindowImpl window) {
         //find appropriate sliding bars first, otherwise the split hierarchy
         //will change while sliding some windows so the sliding positions would be wrong
         Map<TopComponent, String> tc2slideSide = new HashMap<TopComponent, String>(30);
-        Set<? extends Mode> modes = getModes();
+//        Set<? extends Mode> modes = getModes();
+        Set<ModeImpl> modes = model.getModesForWindow(window);
         for( Iterator<? extends Mode> i=modes.iterator(); i.hasNext(); ) {
             ModeImpl modeImpl = (ModeImpl)i.next();
+            //NbWindowImpl window = getWindowForMode(modeImpl);
             if( modeImpl.getKind() == Constants.MODE_KIND_VIEW 
-                    && modeImpl != getViewMaximizedMode()
+                    && modeImpl != getViewMaximizedMode(window)
                     && modeImpl.getState() != Constants.MODE_STATE_SEPARATED ) {
                 List<TopComponent> views = getModeOpenedTopComponents( modeImpl );
                 for( Iterator<TopComponent> j=views.iterator(); j.hasNext(); ) {
@@ -3062,8 +3248,9 @@ final class Central implements ControllerHandler {
         }
         for( Iterator<? extends Mode> i=modes.iterator(); i.hasNext(); ) {
             ModeImpl modeImpl = (ModeImpl)i.next();
+//            NbWindowImpl window = getWindowForMode(modeImpl);
             if( modeImpl.getKind() == Constants.MODE_KIND_VIEW 
-                    && modeImpl != getViewMaximizedMode()
+                    && modeImpl != getViewMaximizedMode(window)
                     && modeImpl.getState() != Constants.MODE_STATE_SEPARATED ) {
                 List<TopComponent> views = getModeOpenedTopComponents( modeImpl );
                 Collections.reverse( views );
@@ -3086,9 +3273,10 @@ final class Central implements ControllerHandler {
         ModeImpl currentMode = ( ModeImpl ) WindowManagerImpl.getInstance().findMode( tc );
         if( null == currentMode ) 
             return;
-        ModeImpl newMode = attachModeToSide( currentMode, null, currentMode.getKind() );
+        ModeImpl newMode = attachModeToSide(null, currentMode, null, currentMode.getKind() );
         moveTopComponentIntoMode( newMode, tc );
-        updateViewAfterDnD( true );
+        NbWindowImpl window = getWindowForMode(newMode);
+        updateViewAfterDnD(window, true );
         tc.requestActive();
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
@@ -3106,7 +3294,8 @@ final class Central implements ControllerHandler {
         mergeModes( mode, neighbor, -1 );
         if( null != selTC )
             selTC.requestActive();
-        updateViewAfterDnD( true );
+        NbWindowImpl window  = getWindowForMode(mode);
+        updateViewAfterDnD(window, true );
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -3171,5 +3360,110 @@ final class Central implements ControllerHandler {
                 return false;
         }
         return sc1[sc1.length-1].orientation == sc2[sc2.length-1].orientation;
+    }
+    
+    // NEW --------------------------------------------------------------------
+    
+    public void createNbWindowModel(NbWindowImpl window, String name, Rectangle bounds) {
+        model.createNbWindowModel(window, name, bounds);
+        
+//        if(defaultModes) {        
+//            // a nbwindow name can be changed via setName - ? Should that be allowed ? Should we also have a UID?
+//            ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(name + "_editor", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true);  
+//            model.addMode(window, newMode, new SplitConstraint[0]);
+//
+//            ModeImpl newMode2 = WindowManagerImpl.getInstance().createModeImpl(name + "_bottomSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true); 
+//            model.addSlidingMode(window, newMode2, "bottom", null);
+//
+//            ModeImpl newMode3 = WindowManagerImpl.getInstance().createModeImpl(name + "_rightSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
+//            model.addSlidingMode(window, newMode3, "right", null);
+//
+//            ModeImpl newMode4 = WindowManagerImpl.getInstance().createModeImpl(name + "_leftSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
+//            model.addSlidingMode(window, newMode4, "left", null);
+//
+//            ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(name + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
+//            model.addSlidingMode(window, newMode5, "top", null);
+//        }
+        
+        viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, null));
+    }
+    
+    public String getNbWindowName(NbWindowImpl window) {
+        return model.getNbWindowName(window);
+    }
+    
+    public Rectangle getNbWindowBounds(NbWindowImpl window) {
+        return model.getNbWindowBounds(window);
+    }
+    
+    public void setNbWindowBounds(NbWindowImpl window, Rectangle bounds) {
+        model.setNbWindowBounds(window, bounds);
+        viewRequestor.scheduleRequest(new ViewRequest(window, View.CHANGE_NBWINDOW_BOUNDS_CHANGED, null, bounds));
+    }
+    
+    public boolean isNbWindowVisible(NbWindowImpl window) {
+        return model.isNbWindowVisible(window);
+    }
+    
+    public void setNbWindowVisible(NbWindowImpl window, boolean visible) {
+        model.setNbWindowVisible(window, visible);
+        viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, window));
+    }
+    
+    public void userClosedNbWindow(NbWindowImpl window) {
+        destroyNbWindow(window);
+    }
+
+    @Override
+    public void destroyNbWindow(NbWindowImpl window) {
+        // TODO gwi destroy-window: Need to correctly cleanup resouces when the window is closed
+       window.setVisible(false);
+       Window rootPane = NbWindowTracker.getInstance().toWindow(window);
+       ZOrderManager.getInstance().detachWindow((RootPaneContainer)rootPane);
+       rootPane.setVisible(false); 
+        // get all modes
+        Set<ModeImpl> winModes = model.getModesForWindow(window);
+        for(ModeImpl mode: winModes) {        
+            model.removeMode(mode, true);
+            userClosedMode(mode);
+        }
+        model.removeNbWindow(window);        
+        viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_REMOVED, window, window));
+    }
+    
+    
+
+    @Override
+    public void userResizedNbWindow(NbWindowImpl window, Rectangle bounds) {
+        window.setBounds(bounds);
+        //model.setAuxWindowBounds(window, bounds);
+    }
+    
+    public Set<NbWindowImpl> getNbWindows() {
+        return model.getNbWindows();
+    }
+    
+ 
+    /*private*/ String getUnusedNbWindowName() {
+        String base = "#";
+
+        // don't allow base to be too long, because will act as file name too
+        // PENDING Maximal length is 20.
+        if (base.length() > 20) {
+            base = base.substring(0, 20);
+        }
+
+        // add numbers to the name
+        String result;
+        int windowNumber = 1;
+        WindowManagerImpl wm = WindowManagerImpl.getInstance();
+        while (model.findNbWindow(result = base + windowNumber) != null) { // NOI18N
+            windowNumber++;
+        }
+        return result;
+    }
+    
+    public NbWindowImpl getWindowForMode(ModeImpl mode) {
+        return model.getWindowForMode(mode);
     }
 }

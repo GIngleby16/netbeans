@@ -30,6 +30,7 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListDataEvent;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.EditorOnlyDisplayer;
 import org.netbeans.core.windows.ModeImpl;
@@ -104,12 +105,12 @@ public final class SlideBar extends JPanel implements ComplexListDataListener,
     /** Creates a new instance of SlideBarContainer with specified orientation.
      * See SlideBarDataModel for possible orientation values.
      */
-    public SlideBar(TabbedSlideAdapter tabbed, SlideBarDataModel dataModel, SingleSelectionModel selModel) {
+    public SlideBar(NbWindowImpl window, TabbedSlideAdapter tabbed, SlideBarDataModel dataModel, SingleSelectionModel selModel) {
         super(new GridBagLayout() );
         this.tabbed = tabbed;                
         this.dataModel = dataModel;
         this.selModel = selModel;
-        commandMgr = new CommandManager(this);
+        commandMgr = new CommandManager(window, this);
         gestureRecognizer = new SlideGestureRecognizer(this, commandMgr.getResizer());
         buttons = new ArrayList<SlidingButton>(5);
         

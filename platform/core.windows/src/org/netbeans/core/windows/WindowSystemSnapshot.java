@@ -22,6 +22,8 @@ package org.netbeans.core.windows;
 
 
 import java.awt.*;
+import java.util.Map;
+import org.netbeans.core.windows.NbWindowStructureSnapshot.NbWindowSnapshot;
 
 
 /**
@@ -42,9 +44,10 @@ public class WindowSystemSnapshot {
     private int editorAreaFrameState;
     private Rectangle editorAreaBounds;
     private ModeStructureSnapshot.ModeSnapshot activeMode;
-    private ModeStructureSnapshot.ModeSnapshot maximizedMode;
+    private Map<NbWindowStructureSnapshot.NbWindowSnapshot, ModeStructureSnapshot.ModeSnapshot> maximizedMode;
     private ModeStructureSnapshot modeStructureSnapshot;
     private String projectName;
+//    private AuxWindowStructureSnapshot auxWindowSnapshot;
     
     public WindowSystemSnapshot() {
     }
@@ -119,12 +122,12 @@ public class WindowSystemSnapshot {
     }
     
     /** */
-    public void setMaximizedModeSnapshot(ModeStructureSnapshot.ModeSnapshot maximizedMode) {
+    public void setMaximizedModeSnapshot(Map<NbWindowSnapshot, ModeStructureSnapshot.ModeSnapshot> maximizedMode) {
         this.maximizedMode = maximizedMode;
     }
     
     /** Gets maximized mode. */
-    public ModeStructureSnapshot.ModeSnapshot getMaximizedModeSnapshot() {
+    public Map<NbWindowSnapshot, ModeStructureSnapshot.ModeSnapshot> getMaximizedModeSnapshot() {
         return maximizedMode;
     }
 
@@ -169,5 +172,15 @@ public class WindowSystemSnapshot {
         return super.toString() + "[modeStructure=" + modeStructureSnapshot // NOI18N
             + ",\nactiveMode=" + activeMode  + ",\nmaximizedMode=" + maximizedMode + "]"; // NOI18N
     }
+    
+    // NEW --------------------------------------------------------------------
+    
+//    public void setAuxWindowSnapshot(AuxWindowStructureSnapshot snapshot) {
+//        this.auxWindowSnapshot = snapshot;
+//    }
+    
+//    public AuxWindowStructureSnapshot getAuxWindowSnapshot() {
+//        return this.auxWindowSnapshot;
+//    }
 }
 

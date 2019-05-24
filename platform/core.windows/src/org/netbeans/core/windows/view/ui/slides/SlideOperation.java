@@ -22,9 +22,7 @@ package org.netbeans.core.windows.view.ui.slides;
 import java.awt.Component;
 import java.awt.Rectangle;
 import javax.swing.JLayeredPane;
-import org.netbeans.core.windows.Constants;
-import org.openide.windows.TopComponent;
-import org.netbeans.swing.tabcontrol.SlideBarDataModel;
+import org.netbeans.core.windows.NbWindowImpl;
 
 /*
  * Interface for slide in and slide out operations. Acts as command interface
@@ -40,6 +38,8 @@ public interface SlideOperation {
     public static final int SLIDE_INTO_DESKTOP = 3;
     public static final int SLIDE_RESIZE = 4;
 
+    public NbWindowImpl getNbWindow();
+    
     public Component getComponent ();
     
     public Rectangle getStartBounds ();

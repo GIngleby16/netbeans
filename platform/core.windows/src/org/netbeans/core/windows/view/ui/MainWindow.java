@@ -59,7 +59,7 @@ public final class MainWindow {
 
    private final JFrame frame;
    private final AutoHidingMenuBar autoHidingMenuBar;
-
+   
    private static JMenuBar mainMenuBar;
 
    /** Desktop. */
@@ -90,7 +90,7 @@ public final class MainWindow {
    /** Constructs main window. */
    private MainWindow(JFrame frame) {
        this.frame = frame;
-       this.autoHidingMenuBar = new AutoHidingMenuBar(frame);
+       this.autoHidingMenuBar = new AutoHidingMenuBar(frame);       
    }
 
    public static MainWindow install( JFrame frame ) {
@@ -508,7 +508,7 @@ public final class MainWindow {
    private static final String ICON_48 = "org/netbeans/core/startup/frame48.gif"; // NOI18N
    private static final String ICON_256 = "org/netbeans/core/startup/frame256.png"; // NOI18N
    private static final String ICON_512 = "org/netbeans/core/startup/frame512.png"; // NOI18N
-   private static final String ICON_1024 = "org/netbeans/core/startup/frame1024.png"; // NOI18N
+   private static final String ICON_1024 = "org/netbeans/core/startup/frame1024.png"; // NOI18N   
    static void initFrameIcons(Frame f) {
        List<Image> currentIcons = f.getIconImages();
        if( !currentIcons.isEmpty() )
@@ -523,13 +523,18 @@ public final class MainWindow {
    }
 
    private void initListeners() {
-       frame.addWindowListener (new WindowAdapter() {
-               @Override
-               public void windowClosing(WindowEvent evt) {
-                   LifecycleManager.getDefault().exit();
-               }
+       frame.addWindowListener(new WindowAdapter() {
+           @Override
+           public void windowActivated(WindowEvent e) {
+               WindowManagerImpl wm = WindowManagerImpl.getInstance();
+               wm.setActiveMode(wm.getActiveMode(null));
            }
-       );
+
+           @Override
+           public void windowClosing(WindowEvent evt) {
+               LifecycleManager.getDefault().exit();
+           }
+       });
    }
 
    static void preInitMenuAndToolbar() {
@@ -768,7 +773,6 @@ public final class MainWindow {
            WindowManagerImpl.getInstance().setVisible(false);
 
        frame.dispose();
-
        autoHidingMenuBar.setAutoHideEnabled(isFullScreenMode);
 
        frame.setUndecorated( isFullScreenMode || isUndecorated );

@@ -373,7 +373,7 @@ public class GroupsManager {
     private ModeImpl createMode(ModeConfig config) {
         WindowManagerImpl wmi = WindowManagerImpl.getInstance();
 
-        ModeImpl res = wmi.createMode(config.name, config.kind, config.state, false, config.constraints);
+        ModeImpl res = wmi.createMode(null, config.name, config.kind, config.state, false, config.constraints);  // TODO gwi-groups: GROUP MANAGER WILL ONYL CREATE A MODE IN MAIN WINDOW
         Rectangle absBounds = config.bounds == null ? new Rectangle() : config.bounds;
         Rectangle relBounds = config.relativeBounds == null ? new Rectangle() : config.relativeBounds;
         Rectangle bounds = PersistenceHandler.computeBounds(false, false,

@@ -28,8 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
@@ -49,6 +47,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.Switches;
@@ -377,10 +376,12 @@ public class DocumentsDlg extends JPanel implements PropertyChangeListener, Expl
                 // #37226-41075 Unmaximized the other mode if needed.
                 WindowManagerImpl wm = WindowManagerImpl.getInstance();
                 ModeImpl mode = (ModeImpl)wm.findMode(tc);
-                if(mode != null && mode != wm.getCurrentMaximizedMode()) {
-                    wm.switchMaximizedMode(null);
+                NbWindowImpl window = wm.getWindowForMode(mode);
+                if(mode != null && mode != wm.getCurrentMaximizedMode(window)) {
+                    wm.switchMaximizedMode(window, null);
                 }
                 tc.requestActive();
+
             }
         });
     }//GEN-LAST:event_activate

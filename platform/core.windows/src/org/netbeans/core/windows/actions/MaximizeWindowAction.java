@@ -34,6 +34,7 @@ import java.beans.PropertyChangeListener;
 import org.netbeans.core.windows.Switches;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.openide.awt.Mnemonics;
 import org.openide.util.Mutex;
 import org.openide.util.actions.Presenter;
@@ -102,27 +103,31 @@ public final class MaximizeWindowAction extends AbstractAction implements Presen
         WindowManagerImpl wm = WindowManagerImpl.getInstance();
         TopComponent curTC = getTCToWorkWith();
         
+        System.out.println("CurrentTopComponent: " + curTC);
+        
         if(wm.isDocked(curTC)) {
             // inside main window
             ModeImpl mode = (ModeImpl)wm.findMode(curTC);
             String tcID = wm.findTopComponentID( curTC );
+            NbWindowImpl window = wm.getWindowForMode(mode);
+            System.out.println("tcID=" + tcID + ", window=" + window + ", mode=" + mode);
             
             if( mode.getKind() == Constants.MODE_KIND_SLIDING ) {
                 //maximize/restore slided-in window
                 wm.userToggledTopComponentSlideInMaximize( tcID );
             } else if( null != mode ) {
-                ModeImpl previousMax = wm.getCurrentMaximizedMode();
+                ModeImpl previousMax = wm.getCurrentMaximizedMode(window);  
                 if( null != previousMax ) {
                     if( previousMax.getKind() == Constants.MODE_KIND_EDITOR && mode.getKind() == Constants.MODE_KIND_VIEW ) {
-                        wm.switchMaximizedMode( mode );
+                        wm.switchMaximizedMode(window, mode );
                     } else {
-                        wm.switchMaximizedMode( null );
+                        wm.switchMaximizedMode(window, null );
                     }
                 } else {
-                    wm.switchMaximizedMode( mode );
+                    wm.switchMaximizedMode(window, mode );
                 }
             } else {
-                wm.switchMaximizedMode( null );
+                wm.switchMaximizedMode(window, null );
             }
         } else {
             // separate windows
@@ -165,9 +170,10 @@ public final class MaximizeWindowAction extends AbstractAction implements Presen
             setEnabled(false);
             return;
         }
+        NbWindowImpl win = wm.getWindowForMode(activeMode);
 
         if (wm.isDocked(active)) {
-            maximize = wm.getCurrentMaximizedMode() != activeMode;
+            maximize = wm.getCurrentMaximizedMode(win) != activeMode;  // TODO gwi-max: null window?
         } else {
             maximize = activeMode.getFrameState() == Frame.NORMAL;
         }

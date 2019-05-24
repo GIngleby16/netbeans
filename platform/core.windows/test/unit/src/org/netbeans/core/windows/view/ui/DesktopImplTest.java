@@ -52,7 +52,7 @@ public class DesktopImplTest extends TestCase {
         TopComponent selTc = new TopComponent();
         selTc.setPreferredSize(new Dimension(200,200) );
         
-        DesktopImpl instance = new DesktopImpl();
+        DesktopImpl instance = new DesktopImpl(true);
         
         //test default behavior
         Rectangle result = instance.computeSlideInBounds(splitRootRect, side, slideComponent, slideBounds, selTc);

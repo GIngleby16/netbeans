@@ -52,7 +52,7 @@ public abstract class AbstractTabbedImpl extends Tabbed {
     /** Debugging flag. */
     private static final boolean DEBUG = Debug.isLoggable(TabbedAdapter.class);
 
-    @Override
+    @Override 
     public final void addTopComponent( String name, javax.swing.Icon icon, TopComponent tc, String toolTip ) {
         insertComponent( name, icon, tc, toolTip, getTabCount() );
     }

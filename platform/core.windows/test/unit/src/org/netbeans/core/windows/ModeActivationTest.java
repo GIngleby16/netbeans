@@ -65,7 +65,7 @@ public class ModeActivationTest extends NbTestCase {
         assertNull("No mode is activated ie. active mode must be null",activeMode);
         
         //Mode cannot be activated when it is empty
-        Mode editor = wmi.getDefaultEditorMode();
+        Mode editor = wmi.getDefaultEditorMode(null);
         wmi.setActiveMode((ModeImpl) editor);
         activeMode = wmi.getActiveMode();
         assertNull("Ignore mode activation when mode is empty",activeMode);

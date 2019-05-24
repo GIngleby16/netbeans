@@ -22,6 +22,7 @@ package org.netbeans.core.windows.view;
 
 import java.awt.Rectangle;
 import java.util.Map;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.view.dnd.WindowDnDManager;
@@ -40,17 +41,24 @@ public class SlidingView extends ModeView {
     private final String side;
     private Rectangle slideBounds;
     private Map<TopComponent,Integer> slideInSizes;
+    
+    private NbWindowImpl window;
 
-    public SlidingView(Controller controller, WindowDnDManager windowDnDManager, 
+    public SlidingView(NbWindowImpl window, Controller controller, WindowDnDManager windowDnDManager, 
                         TopComponent[] topComponents, 
                         TopComponent selectedTopComponent, 
                         String side, Map<TopComponent,Integer> slideInSizes) {
         super(controller);
         this.side = side;
         this.slideInSizes = slideInSizes;
+        this.window = window;
         // mkleint - needs to be called after side is defined.
-        this.container = new SlideBarContainer(this, windowDnDManager);
+        this.container = new SlideBarContainer(window, this, windowDnDManager);
         setTopComponents(topComponents, selectedTopComponent);
+    }
+    
+    public NbWindowImpl getWindow() {
+        return window;
     }
     
     public String getSide() {

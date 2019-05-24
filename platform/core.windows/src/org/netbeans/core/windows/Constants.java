@@ -30,6 +30,9 @@ import org.openide.windows.TopComponent;
  * @author  Peter Zavadsky
  */
 public abstract class Constants {
+    public static final String UNKNOWN_WINDOW = null; // gwi - used to map window to editorSubModel in ModesSubModel
+    public static final String NB_MAIN_WINDOW = null; // gwi - used to map window to editorSubModel in ModesSubModel
+    
 
     /** Constant that identifies state of editor area */
     public static final int EDITOR_AREA_JOINED    = 0;
@@ -38,6 +41,7 @@ public abstract class Constants {
     /** Constant that identifies mode state. */
     public static final int MODE_STATE_JOINED    = 0;
     public static final int MODE_STATE_SEPARATED = 1;
+    public static final int MODE_STATE_NBWINDOW = 2;
     
     /** Constant that identifies mode kind */
     public static final int MODE_KIND_EDITOR = TabbedContainer.TYPE_EDITOR;

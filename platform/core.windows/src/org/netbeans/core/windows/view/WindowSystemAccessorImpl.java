@@ -22,6 +22,7 @@ package org.netbeans.core.windows.view;
 
 
 import java.awt.*;
+import java.util.Map;
 
 
 /**
@@ -42,8 +43,9 @@ final class WindowSystemAccessorImpl implements WindowSystemAccessor {
     private int editorAreaFrameState;
     private Rectangle editorAreaBounds;
     private ModeAccessor activeMode;
-    private ModeAccessor maximizedMode;
+    private Map<NbWindowAccessor, ModeAccessor> maximizedMode;
     private ModeStructureAccessor modeStructureAccessor;
+//    private AuxWindowStructureAccessor auxWindowStructureAccessor;
     
     public WindowSystemAccessorImpl() {
     }
@@ -118,12 +120,12 @@ final class WindowSystemAccessorImpl implements WindowSystemAccessor {
     }
     
     /** */
-    public void setMaximizedModeAccessor(ModeAccessor maximizedMode) {
+    public void setMaximizedModeAccessor(Map<NbWindowAccessor, ModeAccessor> maximizedMode) {
         this.maximizedMode = maximizedMode;
     }
     
     /** Gets maximized mode. */
-    public ModeAccessor getMaximizedModeAccessor() {
+    public Map<NbWindowAccessor, ModeAccessor> getMaximizedModeAccessor() {
         return maximizedMode;
     }
 
@@ -159,5 +161,15 @@ final class WindowSystemAccessorImpl implements WindowSystemAccessor {
         return super.toString() + "[modeStructure=" + modeStructureAccessor // NOI18N
             + ",\nactiveMode=" + activeMode  + ",\nmaximizedMode=" + maximizedMode + "]"; // NOI18N
     }
+
+//    @Override
+//    public AuxWindowStructureAccessor getAuxWindowStructureAccessor() {
+//        return auxWindowStructureAccessor;
+//    }
+//
+//    //TODO gwi: setAuxWindowStructureAccessor added
+//    public void setAuxWindowStructureAccessor(AuxWindowStructureAccessor auxWindowStructureAccessor) {
+//        this.auxWindowStructureAccessor = auxWindowStructureAccessor;
+//    }
 }
 

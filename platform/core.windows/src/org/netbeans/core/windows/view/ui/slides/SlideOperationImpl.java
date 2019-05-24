@@ -29,6 +29,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.swing.tabcontrol.SlideBarDataModel;
@@ -64,19 +65,27 @@ class SlideOperationImpl implements SlideOperation, ChangeListener {
     /** layer of layered pane to draw into */
     private Integer layer;
     
+    private NbWindowImpl window;
+    
     /** Creates a new instance of SlideInOperation */
-    SlideOperationImpl(int type, Component component, int orientation, 
+    SlideOperationImpl(NbWindowImpl window, int type, Component component, int orientation, 
          SlidingFx effect, boolean requestsActivation) {
-        this(type, component, orientation2Side(orientation), effect, requestsActivation);
+        this(window, type, component, orientation2Side(orientation), effect, requestsActivation);
     }
     
-    SlideOperationImpl(int type, Component component, String side, 
+    SlideOperationImpl(NbWindowImpl window, int type, Component component, String side, 
          SlidingFx effect, boolean requestsActivation) {
+        this.window = window;
         this.type = type; 
         this.component = component;
         this.effect = effect;
         this.requestsActivation = requestsActivation;
         this.side = side;
+    }
+
+    @Override
+    public NbWindowImpl getNbWindow() {
+        return window;
     }
 
     public void run(JLayeredPane pane, Integer layer) {

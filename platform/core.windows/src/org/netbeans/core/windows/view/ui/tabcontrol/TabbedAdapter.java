@@ -31,6 +31,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.Switches;
 import org.netbeans.swing.tabcontrol.*;
@@ -65,11 +66,15 @@ public class TabbedAdapter extends TabbedContainer implements Tabbed.Accessor, S
      * false otherwise 
      */
     public static boolean isInMaximizedMode (Component comp) {
-        ModeImpl maxMode = WindowManagerImpl.getInstance().getCurrentMaximizedMode();
+        TopComponent tc = (TopComponent)comp;
+        WindowManagerImpl wm = WindowManagerImpl.getInstance();
+        ModeImpl mode = (ModeImpl)wm.findMode(tc);
+        NbWindowImpl window = wm.getWindowForMode(mode);
+        ModeImpl maxMode = WindowManagerImpl.getInstance().getCurrentMaximizedMode(window);
         if (maxMode == null) {
             return false;
         }
-        return maxMode.containsTopComponent((TopComponent)comp);
+        return maxMode.containsTopComponent(tc);
     }
     
     /********** implementation of SlideController *****************/

@@ -127,7 +127,7 @@ final class TopComponentSubModel {
         if(selectedTopComponentID == null && !isNullSelectionAllowed()) {
             selectedTopComponentID = tcID;
         }
-        
+                
         // XXX - should be deleted after TopComponent.isSliding is introduced
         if (kind == Constants.MODE_KIND_SLIDING) {
             setSlidingProperty(tc);
@@ -183,6 +183,7 @@ final class TopComponentSubModel {
     
     public boolean addClosedTopComponent(TopComponent tc) {
         int index = openedTopComponents.indexOf(tc);
+        System.out.println("TopComponentSubModel:addClosedTopComponent: " + tc);
         String tcID = getID(tc);
         if (!tcIDs.contains(tcID)) {
             tcIDs.add(tcID);
@@ -194,6 +195,13 @@ final class TopComponentSubModel {
             }
         } 
         
+        
+        if(openedTopComponents.size() == 0){
+            System.out.println(" THIS MODE HAS NO MORE TOP COMPONENTS");      
+            if(kind == Constants.MODE_KIND_EDITOR) {
+                System.out.println("THIS EDITOR MODE IS EMPTY - DOES THE WINDOW HAVE ANY TOP COMPONENTS?");
+            }
+        }
         
         // XXX - should be deleted after TopComponent.isSliding is introduced
         if (kind == Constants.MODE_KIND_SLIDING) {
@@ -258,6 +266,7 @@ final class TopComponentSubModel {
     }
     
     public boolean isEmpty() {
+        System.out.println("TopComponentSubModel.isEmpty = " + tcIDs.isEmpty());
         return tcIDs.isEmpty();
     }
     
@@ -338,6 +347,7 @@ final class TopComponentSubModel {
     
     // XXX
     public void removeClosedTopComponentID(String tcID) {
+        System.out.println("TopComponentSubModel:removeClosedTopComponent: " + tcID);
         tcIDs.remove(tcID);
     }
     

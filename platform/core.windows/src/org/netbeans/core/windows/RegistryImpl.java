@@ -184,6 +184,12 @@ public final class RegistryImpl extends Object implements TopComponent.Registry 
         }
     }
 
+    public synchronized void topComponentFocused(TopComponent tc) {
+        assert null != tc;
+        doFirePropertyChange("focused", null, tc);
+    }
+    
+    
     /**
      * Called during 'Reset Windows' to re-add document windows that the Reset
      * action does not close.

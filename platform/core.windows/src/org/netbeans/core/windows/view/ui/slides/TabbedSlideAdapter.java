@@ -36,6 +36,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.SingleSelectionModel;
 import javax.swing.event.ChangeListener;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.WindowManagerImpl;
@@ -71,12 +72,15 @@ public final class TabbedSlideAdapter extends Tabbed {
     
     private final ModeImpl slidingMode;
     
+    private NbWindowImpl window;
+    
     /** Creates a new instance of SlideBarTabs */
-    public TabbedSlideAdapter(String side) {
+    public TabbedSlideAdapter(NbWindowImpl window, String side) {
+        this.window = window;
         dataModel = new SlideBarDataModel.Impl();
         setSide(side);
         selModel = new DefaultSingleSelectionModel();
-        slideBar = new SlideBar(this, (SlideBarDataModel)dataModel, selModel);
+        slideBar = new SlideBar(window, this, (SlideBarDataModel)dataModel, selModel);
         slidingMode = findSlidingMode();
     }
     
@@ -431,19 +435,22 @@ public final class TabbedSlideAdapter extends Tabbed {
     
     private ModeImpl findSlidingMode() {
         String modeName;
+        String windowName = "";
+        if(window != null)
+            windowName = window.getName() + "_";        
         switch( ((SlideBarDataModel)dataModel).getOrientation() ) {
             case SlideBarDataModel.EAST:
-                modeName = "rightSlidingSide"; //NOI18N
+                modeName = windowName + "rightSlidingSide"; //NOI18N
                 break;
             case SlideBarDataModel.SOUTH:
-                modeName = "bottomSlidingSide"; //NOI18N
+                modeName = windowName + "bottomSlidingSide"; //NOI18N
                 break;
             case SlideBarDataModel.NORTH:
-                modeName = "topSlidingSide"; //NOI18N
+                modeName = windowName + "topSlidingSide"; //NOI18N
                 break;
             case SlideBarDataModel.WEST:
             default:
-                modeName = "leftSlidingSide"; //NOI18N
+                modeName = windowName + "leftSlidingSide"; //NOI18N
         }
         return ( ModeImpl ) WindowManagerImpl.getInstance().findMode( modeName );
     }

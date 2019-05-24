@@ -751,6 +751,16 @@ class SplitSubModel {
             }
             buffer.append(" parent="); // NOI18N
             buffer.append(node.getParent() == null ? null : "["+Integer.toHexString(node.getParent().hashCode())+"]");
+            buffer.append(">\n");
+//            buffer.append(sb);
+
+            // if we are an editor node - there should be another split model to dump!
+            EditorSplitSubModel.EditorNode editorNode = (EditorSplitSubModel.EditorNode) node;
+            SplitSubModel temp = editorNode.getEditorArea();
+            buffer.append(dumpNode(temp.root, ind, "child[0]"));
+
+            
+            buffer.append(sb);                        
             buffer.append("</editor-node>\n"); // NOI18N
         }
         return buffer.toString();
@@ -767,7 +777,7 @@ class SplitSubModel {
     ///////////////////////////////
     // Controller updates >>
     
-    public ModeImpl getModeForOriginator(ModelElement originator) {
+    public static ModeImpl getModeForOriginator(ModelElement originator) {
         if(originator instanceof ModeNode) {
             return ((ModeNode)originator).getMode();
         }
@@ -1117,7 +1127,8 @@ class SplitSubModel {
             
             if(mode.getKind() == Constants.MODE_KIND_EDITOR ) {
                 WindowManagerImpl wm = WindowManagerImpl.getInstance();
-                if( null != wm.getEditorMaximizedMode() && wm.getEditorMaximizedMode() != mode )
+                NbWindowImpl window = wm.getWindowForMode(mode);
+                if( null != wm.getEditorMaximizedMode(window) && wm.getEditorMaximizedMode(window) != mode )
                     return false;
             }
 

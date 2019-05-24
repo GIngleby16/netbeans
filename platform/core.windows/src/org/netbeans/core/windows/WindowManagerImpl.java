@@ -372,11 +372,12 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * @return the new mode */
     @Override
     public Mode createMode(String name, String displayName, URL icon) {
+        // TODO gwi-null: this will work with main-window only
         if(getEditorAreaState() == Constants.EDITOR_AREA_JOINED) {
-            return new WrapMode (createMode(name, Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, null));
+            return new WrapMode (createMode(null, name, Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, null));
         } else {
             // #36945 In 'separate' ui mode create new mode.
-            return createMode(name, Constants.MODE_KIND_VIEW, Constants.MODE_STATE_SEPARATED, false,
+            return createMode(null, name, Constants.MODE_KIND_VIEW, Constants.MODE_STATE_SEPARATED, false,
                 new SplitConstraint[] { new SplitConstraint(Constants.HORIZONTAL, 1, 0.2)});
         }
     }
@@ -412,10 +413,10 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * @param mode 
      * @since 2.30
      */
-    public void userMinimizedMode( ModeImpl mode ) {
+    public void userMinimizedMode(NbWindowImpl window, ModeImpl mode ) {
         assertEventDispatchThread();
         
-        getCentral().userMinimizedMode( mode );
+        getCentral().userMinimizedMode( window, mode );
     }
 
     /**
@@ -599,7 +600,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     /** Creates new mode.
      * @param name a unique programmatic name of the mode 
      * @param permanent true if mode has to remain in model even it is emptied */
-    public ModeImpl createMode(String name, int kind, int state, boolean permanent, SplitConstraint[] constraints) {
+    public ModeImpl createMode(NbWindowImpl window, String name, int kind, int state, boolean permanent, SplitConstraint[] constraints) {
         // It gets existing mode with the same name.
         ModeImpl mode = (ModeImpl)findMode(name);
         if(mode != null) {
@@ -609,18 +610,18 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         // XXX PENDING When no constraints are specified, default (editor or view) mode is returned.
         if(constraints == null && kind != Constants.MODE_KIND_SLIDING) {
             if(kind == Constants.MODE_KIND_EDITOR) {
-                return getDefaultEditorMode();
+                return getDefaultEditorMode(window);
             } else {
-                return getDefaultViewMode();
+                return getDefaultViewMode(window);
             }
         }
 
         mode = createModeImpl(name, kind, state, permanent);
-        addMode(mode, constraints);
+        addMode(window, mode, constraints);
         return mode;
     }
     
-    public ModeImpl createSlidingMode(String name, boolean permanent, String side, Map<String,Integer> slideInSizes) {
+    public ModeImpl createSlidingMode(NbWindowImpl window, String name, boolean permanent, String side, Map<String,Integer> slideInSizes) {
         // It gets existing mode with the same name.
         ModeImpl mode = (ModeImpl)findMode(name);
         if(mode != null) {
@@ -628,10 +629,9 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         }
         
         mode = createModeImpl(name, Constants.MODE_KIND_SLIDING, permanent);
-        central.addSlidingMode(mode, null, side, slideInSizes);
+        central.addSlidingMode(window, mode, null, side, slideInSizes);
         return mode;
     }
-    
     
     /*private*/ ModeImpl createModeImpl(String name, int kind, boolean permanent) {
         int state = getEditorAreaState() == Constants.EDITOR_AREA_JOINED
@@ -651,14 +651,17 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
 
     // XXX
     /** Gets default mode. */
-    /*private*/ ModeImpl getDefaultEditorMode() {
-        ModeImpl mode = findModeImpl("editor"); // NOI18N
+    /*private*/ ModeImpl getDefaultEditorMode(NbWindowImpl window) {
+        String modeName = "editor";
+        if(window != null)
+            modeName = window.getName() + "_editor";
+        ModeImpl mode = findModeImpl(modeName); // NOI18N
         if(mode == null) {
             Logger.getLogger(WindowManagerImpl.class.getName()).log(Level.FINE, null,
                               new java.lang.IllegalStateException("Creating default editor mode. It shouldn\'t happen this way")); // NOI18N
             // PENDING should be defined in winsys layer?
-            ModeImpl newMode = createModeImpl("editor", Constants.MODE_KIND_EDITOR, true); // NOI18N
-            addMode(newMode, new SplitConstraint[0]);
+            ModeImpl newMode = createModeImpl(modeName, Constants.MODE_KIND_EDITOR, true); // NOI18N
+            addMode(null, newMode, new SplitConstraint[0]);  // TODO gwi-editor: will add new mode to the main window!
             return newMode;
         } else {
             return mode;
@@ -666,10 +669,10 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     /** Gets default mode for opening new component. */
-    /*private*/ ModeImpl getDefaultEditorModeForOpen() {
+    /*private*/ ModeImpl getDefaultEditorModeForOpen(NbWindowImpl window) {
         ModeImpl mode = central.getLastActiveEditorMode();
         if (mode == null) {
-            return getDefaultEditorMode();
+            return getDefaultEditorMode(window);
         } else {
             return mode;
         }
@@ -677,14 +680,17 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     
     // XXX
     /** Gets default view mode. */
-    ModeImpl getDefaultViewMode() {
-        ModeImpl mode = findModeImpl("explorer"); // NOI18N
+    ModeImpl getDefaultViewMode(NbWindowImpl window) {
+        String modeName = "explorer";
+        if(window != null)
+            modeName = window.getName() + "_explorer";
+        ModeImpl mode = findModeImpl(modeName); // NOI18N
         if(mode == null) {
             Logger.getLogger(WindowManagerImpl.class.getName()).log(Level.INFO, null,
                               new java.lang.IllegalStateException("Creating default view mode. It shouldn\'t happen this way")); // NOI18N
             // PENDING should be defined in winsys layer?
-            ModeImpl newMode = createModeImpl("explorer", Constants.MODE_KIND_VIEW, true); // NOI18N
-            addMode(newMode, new SplitConstraint[] {
+            ModeImpl newMode = createModeImpl(modeName, Constants.MODE_KIND_VIEW, true); // NOI18N
+            addMode(window, newMode, new SplitConstraint[] {  // TODO gwi: getDefaultViewMode will add new mode to main window
                 new SplitConstraint(Constants.VERTICAL, 0, 0.7D),
                 new SplitConstraint(Constants.HORIZONTAL, 0, 0.25D)
             });
@@ -695,14 +701,17 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     /** Gets default sliding view mode. */
-    ModeImpl getDefaultSlidingMode() {
-        ModeImpl mode = findModeImpl("sliding"); // NOI18N
+    ModeImpl getDefaultSlidingMode(NbWindowImpl window) {
+        String modeName = "sliding";
+        if(window != null)
+            modeName = window.getName() + "_sliding";
+        ModeImpl mode = findModeImpl(modeName); // NOI18N
         if(mode == null) {
             Logger.getLogger(WindowManagerImpl.class.getName()).log(Level.INFO, null,
                               new java.lang.IllegalStateException("Creating default sliding mode. It shouldn\'t happen this way")); // NOI18N
             // PENDING should be defined in winsys layer?
-            ModeImpl newMode = createModeImpl("sliding", Constants.MODE_KIND_SLIDING, true); // NOI18N
-            addMode(newMode, new SplitConstraint[] {
+            ModeImpl newMode = createModeImpl(modeName, Constants.MODE_KIND_SLIDING, true); // NOI18N
+            addMode(window, newMode, new SplitConstraint[] {  // getDefaultSlidingMode will use MAIN window
                 new SplitConstraint(Constants.VERTICAL, 0, 0.7D),
                 new SplitConstraint(Constants.HORIZONTAL, 0, 0.25D)
             });
@@ -772,6 +781,11 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         return central.getActiveMode();
     }
     
+    public ModeImpl getActiveMode (NbWindowImpl window) {
+        return central.getActiveMode(window);
+    }
+    
+    
     /** Sets active mode.
      * @param current active mode */
     public void setActiveMode(ModeImpl activeMode) {
@@ -787,17 +801,17 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
 
     /** Sets editor area constraints. */
-    public void setEditorAreaConstraints(SplitConstraint[] editorAreaConstraints) {
-        central.setEditorAreaConstraints(editorAreaConstraints);
+    public void setEditorAreaConstraints(NbWindowImpl window, SplitConstraint[] editorAreaConstraints) {
+        central.setEditorAreaConstraints(window, editorAreaConstraints);
     }
     
-    public java.awt.Component getEditorAreaComponent() {
-        return central.getEditorAreaComponent();
+    public java.awt.Component getEditorAreaComponent(NbWindowImpl window) {
+        return central.getEditorAreaComponent(window);
     }
     
     /** Gets editor area constraints. */
-    public SplitConstraint[] getEditorAreaConstraints() {
-        return central.getEditorAreaConstraints();
+    public SplitConstraint[] getEditorAreaConstraints(NbWindowImpl window) {
+        return central.getEditorAreaConstraints(window);
     }
     
     /** Sets editor area state. */
@@ -826,13 +840,13 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * Sets new maximized mode or cancels the current one. 
      * @param newMaximizedMode Mode to set as the maximized one or null to cancel the current one.
      */
-    public void switchMaximizedMode(ModeImpl newMaximizedMode) {
-        central.switchMaximizedMode(newMaximizedMode);
+    public void switchMaximizedMode(NbWindowImpl window, ModeImpl newMaximizedMode) {
+        central.switchMaximizedMode(window, newMaximizedMode);
     }
     
     /** Sets editor mode that is currenlty maximized (used when the window system loads) */
-    public void setEditorMaximizedMode(ModeImpl editorMaximizedMode) {
-        central.setEditorMaximizedMode(editorMaximizedMode);
+    public void setEditorMaximizedMode(NbWindowImpl window, ModeImpl editorMaximizedMode) {
+        central.setEditorMaximizedMode(window, editorMaximizedMode);
     }
     
     /** Sets view mode that is currenlty maximized (used when the window system loads) */
@@ -841,37 +855,38 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     /** Gets mode that is currently maximized. */
-    public ModeImpl getCurrentMaximizedMode() {
-        return central.getCurrentMaximizedMode();
+    public ModeImpl getCurrentMaximizedMode(NbWindowImpl window) {
+        return central.getCurrentMaximizedMode(window);
     }
     
     /** Gets editor maximized mode. */
-    public ModeImpl getEditorMaximizedMode() {
-        return central.getEditorMaximizedMode();
+    public ModeImpl getEditorMaximizedMode(NbWindowImpl window) {
+        return central.getEditorMaximizedMode(window);
     }
     
     /** Gets view maximized mode. */
-    public ModeImpl getViewMaximizedMode() {
-        return central.getViewMaximizedMode();
+    public ModeImpl getViewMaximizedMode(NbWindowImpl window) {
+        return central.getViewMaximizedMode(window);
     }
     
     /** Sets constraints, delegates from ModeImpl. */
-    public void setModeConstraints(ModeImpl mode, SplitConstraint[] modeConstraints) {
-        central.setModeConstraints(mode, modeConstraints);
+    public void setModeConstraints(NbWindowImpl window, ModeImpl mode, SplitConstraint[] modeConstraints) {
+        central.setModeConstraints(window, mode, modeConstraints);
     }
     
     /** Gets constraints, delegates from ModeImpl. */
     public SplitConstraint[] getModeConstraints(ModeImpl mode) {
-        return central.getModeConstraints(mode);
+        NbWindowImpl window = getWindowForMode(mode);
+        return central.getModeConstraints(window, mode);
     }
 
     /** Adds mode. */
-    private void addMode(ModeImpl mode, SplitConstraint[] modeConstraints) {
+    private void addMode(NbWindowImpl window, ModeImpl mode, SplitConstraint[] modeConstraints) {
         if (mode.getKind() == Constants.MODE_KIND_SLIDING) {
             // TODO.. where to get the side..
-            central.addSlidingMode(mode, null, Constants.LEFT, null);
+            central.addSlidingMode(window, mode, null, Constants.LEFT, null);
         } else {
-            central.addMode(mode, modeConstraints);
+            central.addMode(window, mode, modeConstraints);
         }
     }
     
@@ -924,8 +939,8 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     /** Creates a new mode on the side of the given mode 
      * @since 2.32
      */
-    public ModeImpl attachModeToSide(ModeImpl referenceMode, String side, String modeName, int modeKind, boolean permanent) {
-        return central.attachModeToSide(referenceMode, side, modeName, modeKind, permanent);
+    public ModeImpl attachModeToSide(NbWindowImpl window, ModeImpl referenceMode, String side, String modeName, int modeKind, boolean permanent) {
+        return central.attachModeToSide(window, referenceMode, side, modeName, modeKind, permanent);
     }
     
     /** Indicates whether windows system shows GUI. */
@@ -1128,10 +1143,16 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     public void notifyTopComponentClosed(TopComponent tc) {
+        System.out.println("WindowManagerImpl:notifyTopComponentClosed: " + tc);
         // Inform component instance.
         componentCloseNotify(tc);
         // let others know that top component was closed...
         notifyRegistryTopComponentClosed(tc);
+    }
+    
+    public void notifyTopComponentFocused(TopComponent tc) {
+        // added by gwi - support for multiple windows
+        notifyRegistryTopComponentFocused(tc);
     }
     // Notifications<<
     /////////////////////////
@@ -1160,7 +1181,12 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     private static void notifyRegistryTopComponentClosed(TopComponent tc) {
+        System.out.println("WindowManager:notifyRegistryTopComponentClosed: "+ tc);
         ((RegistryImpl)getDefault().getRegistry()).topComponentClosed(tc);
+    }
+
+    private static void notifyRegistryTopComponentFocused(TopComponent tc) {
+        ((RegistryImpl)getDefault().getRegistry()).topComponentFocused(tc);
     }
     
     private static void notifyRegistrySelectedNodesChanged(TopComponent tc, Node[] nodes) {
@@ -1214,7 +1240,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         ModeImpl mode = getMode(tc);
         
         if (mode == null) {
-            mode = getDefaultEditorModeForOpen();
+            mode = getDefaultEditorModeForOpen(null); // GWI mode is null so we use main
             Collection<? extends ModeSelector> selectors = Lookup.getDefault().lookupAll(ModeSelector.class);
             for (ModeSelector s : selectors) {
                 Mode hintMode = s.selectModeForOpen(tc, mode);
@@ -1234,11 +1260,12 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
 
         // XXX PENDING If necessary, unmaximize the state, but exclude sliding modes
         // Consider to put it in addOpenedTopComponent, to do it in one step.
-        ModeImpl maximizedMode = getCurrentMaximizedMode();
+        ModeImpl maximizedMode = getCurrentMaximizedMode(central.getWindowForMode(mode));
+        NbWindowImpl window = central.getWindowForMode(mode);
         if(maximizedMode != null && mode != maximizedMode
            && mode.getKind() != Constants.MODE_KIND_SLIDING
-           && (central.isViewMaximized() || mode.getKind() == Constants.MODE_KIND_EDITOR)) {
-            switchMaximizedMode(null);
+           && (central.isViewMaximized(window) || mode.getKind() == Constants.MODE_KIND_EDITOR)) {
+            switchMaximizedMode(window, null);
         }
         
         if (position == -1) {
@@ -1247,21 +1274,21 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
             mode.addOpenedTopComponent(tc, position);
         }
         
-        if( central.isEditorMaximized() 
+        if( central.isEditorMaximized(window) 
                 && !alreadyOpened 
                 && mode.getState() != Constants.MODE_STATE_SEPARATED ) {
             //the editor is maximized so the newly opened TopComponent should slide out
             String tcID = findTopComponentID( tc );
             if( !isTopComponentDockedInMaximizedMode( tcID ) && mode.getKind() == Constants.MODE_KIND_VIEW ) {
                 //slide the TopComponent to edgebar and slide it out
-                central.slide( tc, mode, central.getSlideSideForMode( mode ) );
+                central.slide( tc, mode, central.getSlideSideForMode(window, mode ) );
 
                 topComponentRequestActive( tc );
                 return;
             }
         }
         if( mode.isMinimized() && Switches.isTopComponentAutoSlideInMinimizedModeEnabled() ) {
-            central.slide( tc, mode, central.getSlideSideForMode( mode ) );
+            central.slide( tc, mode, central.getSlideSideForMode( window, mode ) );
 
             topComponentRequestActive( tc );
         }
@@ -1281,6 +1308,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     
     @Override
     protected void topComponentClose(TopComponent tc) {
+        System.out.println("WindowManager:topComponentClose: " + tc);
         warnIfNotInEDT();
         
         boolean opened = topComponentIsOpened(tc);
@@ -1293,8 +1321,11 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
 
         ModeImpl mode = getModeForOpenedTopComponent(tc);
         if(mode != null) {
-            if( mode == central.getCurrentMaximizedMode() && central.isViewMaximized() ) {
-                central.switchMaximizedMode( null );
+            // need window for mode!
+            NbWindowImpl window = central.getWindowForMode(mode);
+            
+            if( mode == central.getCurrentMaximizedMode(window) && central.isViewMaximized(window) ) {
+                central.switchMaximizedMode(window, null );
                 topComponentClose( tc );
             } else {
                 TopComponent recentTc = null;
@@ -1413,12 +1444,18 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     public boolean isEditorTopComponent( TopComponent tc ) {
         if( null == tc )
             return false;
-        //check opened TopComponents first to avoid AWT assertion if possible
-        for(ModeImpl mode: getModes()) {
-            if( mode.getKind() != Constants.MODE_KIND_EDITOR )
-                continue;
-            if( mode.containsTopComponent( tc ) ) {
-                return true;
+
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            // if our enhanced dnd mode - check to see if the component is an editor using EditorSelectorService
+            return isEditor(tc);
+        } else {
+            //check opened TopComponents first to avoid AWT assertion if possible
+            for(ModeImpl mode: getModes()) {
+                if( mode.getKind() != Constants.MODE_KIND_EDITOR )
+                    continue;
+                if( mode.containsTopComponent( tc ) ) {
+                    return true;
+                }
             }
         }
 
@@ -1534,7 +1571,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
                     // window manager isn't yet visible => exit for now
                     return;
                 }
-            }
+            }            
             
             synchronized (this) {
                 if (arr.isEmpty()) {
@@ -1637,7 +1674,9 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * false if it should slide out when the editor is maximized.
      */
     public void setTopComponentDockedInMaximizedMode( String tcID, boolean docked ) {
-        getCentral().setTopComponentDockedInMaximizedMode( tcID, docked );
+        ModeImpl mode = (ModeImpl)findMode(tcID);
+        NbWindowImpl window = getWindowForMode(mode);
+        getCentral().setTopComponentDockedInMaximizedMode(window, tcID, docked );
     }
     
     /**
@@ -1648,7 +1687,9 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * false if it should slide out when the editor is maximized.
      */
     public boolean isTopComponentDockedInMaximizedMode( String tcID ) {
-        return getCentral().isTopComponentDockedInMaximizedMode( tcID );
+        ModeImpl mode = (ModeImpl)findMode(tcID);
+        NbWindowImpl window = getWindowForMode(mode);
+        return getCentral().isTopComponentDockedInMaximizedMode(window, tcID );
     }
     
     /**
@@ -1659,7 +1700,9 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * false if it is docked.
      */
     public void setTopComponentSlidedInDefaultMode( String tcID, boolean slided ) {
-        getCentral().setTopComponentSlidedInDefaultMode( tcID, slided );
+        ModeImpl mode = (ModeImpl)findMode(tcID);
+        NbWindowImpl window = getWindowForMode(mode);
+        getCentral().setTopComponentSlidedInDefaultMode(window, tcID, slided );
     }
     
     /**
@@ -1670,7 +1713,9 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
      * false if it is docked.
      */
     public boolean isTopComponentSlidedInDefaultMode( String tcID ) {
-        return getCentral().isTopComponentSlidedInDefaultMode( tcID );
+        ModeImpl mode = (ModeImpl)findMode(tcID);
+        NbWindowImpl window = getWindowForMode(mode);
+        return getCentral().isTopComponentSlidedInDefaultMode(window, tcID );
     }
     
     /**
@@ -2111,5 +2156,56 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
             return PERSISTENCE_NEVER;
         }
     }
+        
+    // NEW ----------------------------------------------------------------
+
+    //@Override
+    public NbWindow createNbWindow(String name, Rectangle bounds, boolean requestDialog) {
+        return createNbWindowImpl(name, bounds, requestDialog);
+    }
+    
+    public void destroyNbWindow(NbWindowImpl window) {
+        getCentral().destroyNbWindow(window);
+    }
+    
+    private NbWindow createNbWindowImpl(String name, Rectangle bounds, boolean requestDialog) {
+        return new NbWindowImpl(name, bounds, requestDialog);
+    }
+    
+    public Set<NbWindow> getNbWindows() {
+        return new HashSet<NbWindow>(central.getNbWindows());
+    }
+    
+    public NbWindowImpl getWindowForMode(ModeImpl mode) {
+        return central.getWindowForMode(mode);
+    }
+
+    @Override
+    public boolean isNbWindow(Window window) {
+        return NbWindowTracker.getInstance().toNbWindow(window) != null;
+    }
+
+    @Override
+    public NbWindow findNbWindow(String name) {
+        if(name == null || name.length() == 0)
+            return null;
+        
+        Set<NbWindow> windows = getNbWindows();
+        for(NbWindow win: windows) {
+            if(win.getName().equals(name))
+                return win;
+        }
+        
+        return null;
+    }
+
+    public boolean isEditor(TopComponent tc) {
+        Collection<? extends EditorSelector> selectors = Lookup.getDefault().lookupAll(EditorSelector.class);
+        for (EditorSelector s : selectors) {
+            if(s.isEditor(tc))
+                return true;
+        }
+        return false;
+    }        
 }
 

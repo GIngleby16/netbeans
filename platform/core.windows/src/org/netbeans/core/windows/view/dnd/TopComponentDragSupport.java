@@ -277,6 +277,10 @@ implements AWTEventListener, DragSourceListener, DragSourceMotionListener {
                 TopComponent[] tcs = tabbed.getTopComponents();
                 if( null != tcs && tcs.length > 0 ) {
                     ModeImpl mode = ( ModeImpl ) WindowManagerImpl.getInstance().findMode( tcs[0] );
+//                    if(mode == WindowManagerImpl.getInstance().findMode("editor")) {
+//                        System.out.println("ARGH! DONT ALLOW DRAG EDITOR MODE!");
+//                        return;
+//                    }
                     if( null != mode && ((mode.getKind() == Constants.MODE_KIND_EDITOR && Switches.isEditorModeDragAndDropEnabled())
                                             ||
                                         (mode.getKind() == Constants.MODE_KIND_VIEW && Switches.isViewModeDragAndDropEnabled())) ) {

@@ -91,7 +91,7 @@ implements PropertyChangeListener {
 //                || contextMode.getKind() == Constants.MODE_KIND_EDITOR 
                 || contextMode.getState() == Constants.MODE_STATE_SEPARATED
                 || null == contextMode.getSelectedTopComponent()
-                || WindowManagerImpl.getInstance().getCurrentMaximizedMode() != null ) {
+                || WindowManagerImpl.getInstance().getCurrentMaximizedMode(null) != null ) {  // TODO gwi-max: null window?
             setEnabled( false );
             return;
         }

@@ -249,6 +249,7 @@ public final class ModeImpl implements Mode {
     
     /** Closes given top component. */
     public void close(TopComponent tc) {
+        System.out.println("ModeImpl:close, Mode asked to close topcomponent");
         if(!getOpenedTopComponents().contains(tc)) {
             return;
         }
@@ -258,6 +259,7 @@ public final class ModeImpl implements Mode {
             if (Boolean.TRUE.equals(tc.getClientProperty(Constants.KEEP_NON_PERSISTENT_TC_IN_MODEL_WHEN_CLOSED))) {
                 addClosedTopComponent(tc);
             } else {
+                System.out.println("ModeImpl.close");
                 removeTopComponent(tc);
             }
         }
@@ -416,14 +418,14 @@ public final class ModeImpl implements Mode {
         return getCentral().getModeKind(this);
     }
     /** Gets side, either null for view and editor kinds, a side constant for sliding kind.. */
-    public String getSide() {
-        return getCentral().getModeSide(this);
+    public String getSide(NbWindowImpl window) {
+        return getCentral().getModeSide(getCentral().getWindowForMode(this), this);
     }
     
     // Contstraints and split weights are saved in split structure at wm model level.
     /** Sets constraints for mode. */
     public void setConstraints(SplitConstraint[] constraints) {
-        WindowManagerImpl.getInstance().setModeConstraints(this, constraints);
+        WindowManagerImpl.getInstance().setModeConstraints(WindowManagerImpl.getInstance().getWindowForMode(this), this, constraints);
     }
 
     /** @return Current constraints of this mode, null by default */
@@ -450,8 +452,10 @@ public final class ModeImpl implements Mode {
     
     /** Removes TopComponent from this mode. */
     public void removeTopComponent(TopComponent tc) {
+        System.out.println("ModeImpl:removeTopComponent " + tc);
         getCentral().removeModeTopComponent(this, tc);
-    }
+        
+    }        
     
     public void removeTopComponents(Set topComponentSet) {
         for(Iterator it = topComponentSet.iterator(); it.hasNext(); ) {

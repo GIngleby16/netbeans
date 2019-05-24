@@ -20,6 +20,8 @@
 
 package org.netbeans.core.windows.view;
 
+import java.util.Map;
+
 
 
 
@@ -31,15 +33,7 @@ package org.netbeans.core.windows.view;
  * @author  Peter Zavadsky
  */
 interface ModeStructureAccessor {
-
-    /** Gets root element accessor of split structure. */
-    public ElementAccessor getSplitRootAccessor();
-
-    /** Gets set of separate mode accessors. */
+    public Map<NbWindowAccessor, WindowModeStructureAccessor> getWindowModeStructureAccessor();
     public ModeAccessor[] getSeparateModeAccessors();
-
-    /** Gets set of sliding mode accessors. */
-    public SlidingAccessor[] getSlidingModeAccessors();
-
 }
 

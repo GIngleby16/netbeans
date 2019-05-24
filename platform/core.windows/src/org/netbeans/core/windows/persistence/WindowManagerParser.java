@@ -37,6 +37,9 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
+import org.netbeans.core.windows.WindowManagerImpl;
+import org.netbeans.core.windows.view.dnd.ZOrderManager;
+import org.openide.windows.NbWindow;
 
 /**
  * Handle loading/saving of WindowManager configuration data.
@@ -72,6 +75,9 @@ public class WindowManagerParser {
     private Set<String> tcRefNameLocalSet = new HashSet<String>(101);
     
     private static final Object SAVING_LOCK = new Object();
+    
+    private List<NbWindow> nbWindows = new ArrayList<NbWindow>();
+    private List<String> zOrderList = new ArrayList<String>();
     
     public WindowManagerParser(PersistenceManager pm, String wmName) {
         this.pm = pm;
@@ -338,6 +344,7 @@ public class WindowManagerParser {
         PropertyHandler propertyHandler = new PropertyHandler();
         internalConfig = new InternalConfig();
         propertyHandler.readData(wmc, internalConfig);
+        wmc.zOrder = zOrderList.toArray(new String[zOrderList.size()]);
         if (DEBUG) Debug.log(WindowManagerParser.class, "readProperties LEAVE");
     }
     
@@ -963,6 +970,10 @@ public class WindowManagerParser {
                     handleTcId(attrs);
                 } else if ("tcref-item".equals(qname)) { // NOI18N
                     handleTCRefItem(attrs);
+                } else if ("nbwindow".equals(qname)) { // NOI18N
+                    handleNbWindow(attrs);
+                } else if ("zorder".equals(qname)) { // NOI18N
+                    handleZOrder(attrs);
                 }
             } else {
                 if (DEBUG) Debug.log(WindowManagerParser.class, "WMP.startElement PARSING OLD");
@@ -990,6 +1001,27 @@ public class WindowManagerParser {
         /** Reads element "main-window" and updates window manager config content */
         private void handleMainWindow (Attributes attrs) {
         }
+        
+        /** Reads element "nbwindow" and updates window manager config content */
+        private void handleNbWindow (Attributes attrs) {
+            // TODO gwi-p
+            Rectangle bounds = new Rectangle(
+                    Integer.parseInt(attrs.getValue("x")), 
+                    Integer.parseInt(attrs.getValue("y")), 
+                    Integer.parseInt(attrs.getValue("width")), 
+                    Integer.parseInt(attrs.getValue("height"))); // should use attribute bound values
+            
+            // TODO gwi-window: Going to need an attribute for dialog vs frame
+            // false will always create an NbWindowFrame not NbWindowDialog
+            NbWindow nbWindow = WindowManagerImpl.getInstance().createNbWindow(attrs.getValue("name"), bounds, false); 
+            nbWindows.add(nbWindow);
+        }
+
+        /** Reads element "zorder" and updates window manager config content */
+        private void handleZOrder(Attributes attrs) {
+            zOrderList.add(attrs.getValue("id"));
+        }
+        
         
         /** Reads element "joined-properties" and updates window manager config content */
         private void handleJoinedProperties (Attributes attrs) {
@@ -1798,6 +1830,10 @@ public class WindowManagerParser {
             appendMaximizedMode(wmc, buff);
             appendToolbar(wmc, buff);
             appendRecentViewList(wmc, buff);
+            if(Boolean.getBoolean("netbeans.winsys.enhanced")) {
+                appendNbWindow(wmc, buff);
+                appendZOrder(wmc, buff);
+            }
             
             buff.append("</windowmanager>\n"); // NOI18N
             return buff;
@@ -1834,6 +1870,30 @@ public class WindowManagerParser {
                 append("   centered-vertically=\"").append(wmc.centeredVerticallySeparated).append("\"\n"). // NOI18N
                 append("   frame-state=\"").append(wmc.mainWindowFrameStateSeparated).append("\"\n"). // NOI18N
                 append("/>\n  </main-window>\n"); // NOI18N
+        }
+        
+        
+        private void appendNbWindow (WindowManagerConfig wmc, StringBuffer buff) {
+            // save name of each nbwindow
+            NbWindowConfig[] nbWindows = wmc.nbWindows;
+            if(nbWindows != null) {
+                for(NbWindowConfig win: nbWindows) {
+                    Rectangle bounds = win.getBounds();
+                    buff.append("    <nbwindow name=\"" + win.getName() 
+                            + "\" x=\"" + bounds.x 
+                            + "\" y=\"" + bounds.y 
+                            + "\" width=\"" + bounds.width 
+                            + "\" height=\"" + bounds.height + "\">\n").
+                         append("    </nbwindow>\n"); // NOI18N
+                }
+            }
+        }
+
+        private void appendZOrder(WindowManagerConfig wmc, StringBuffer buff) {
+            String[] zOrder = ZOrderManager.getInstance().getZOrder();
+            for(String name: zOrder) {
+                buff.append("    <zorder id=\"" + name + "\"></zorder>\n"); 
+            }
         }
         
         private void appendEditorArea (WindowManagerConfig wmc, StringBuffer buff) {

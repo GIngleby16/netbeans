@@ -63,8 +63,8 @@ public class EditorView extends ViewElement {
     
     
     // XXX
-    Rectangle getPureBounds() {
-        Component comp = getEditorAreaComponent();
+    Rectangle getPureBounds(NbWindowImpl window) {
+        Component comp = getEditorAreaComponent(window);
         Rectangle bounds = comp.getBounds();
         Point location = new Point(0, 0);
         javax.swing.SwingUtilities.convertPointToScreen(location, comp);
@@ -72,7 +72,7 @@ public class EditorView extends ViewElement {
         return bounds;
     }
     
-    private EditorAreaComponent getEditorAreaComponent() {
+    private EditorAreaComponent getEditorAreaComponent(NbWindowImpl window) {
         if(editorAreaComponent == null) {
             editorAreaComponent = new EditorAreaComponent(this, windowDnDManager);
         }
@@ -116,14 +116,14 @@ public class EditorView extends ViewElement {
     @Override
     public Component getComponent() {
 //        assureComponentInEditorArea();
-        return getEditorAreaComponent();
+        return getEditorAreaComponent(null); //TODO gwi-window: using null will be main only
     }
     
     @Override
     public boolean updateAWTHierarchy(Dimension availableSpace) {
 //        System.out.println("EditorView:updateAWTHierarchy=" + availableSpace);
         boolean result = false;
-        EditorAreaComponent comp = getEditorAreaComponent();
+        EditorAreaComponent comp = getEditorAreaComponent(null);   //TODO gwi-window: using null will be main only
         Dimension d = (Dimension) comp.getClientProperty ("lastAvailableSpace"); //NOI18N
         Dimension currDim = comp.getPreferredSize();
         if (!availableSpace.equals(d) || !availableSpace.equals(currDim)) {
@@ -141,7 +141,7 @@ public class EditorView extends ViewElement {
     }
     
     void assureComponentInEditorArea() {
-        EditorAreaComponent eac = getEditorAreaComponent();
+        EditorAreaComponent eac = getEditorAreaComponent(null); //TODO gwi-window: using null will be main only
         if(editorArea == null) {
             eac.setAreaComponent(null);
         } else {
@@ -367,6 +367,7 @@ public class EditorView extends ViewElement {
             if(transfer.isAllowedToMoveAnywhere()) {
                 return true;
             }
+            
             
             int kind = transfer.getKind();
 

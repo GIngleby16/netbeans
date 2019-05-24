@@ -23,6 +23,7 @@ package org.netbeans.core.windows.view;
 
 import org.netbeans.core.windows.WindowSystemSnapshot;
 import java.awt.*;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 import org.openide.windows.TopComponent;
 
@@ -52,6 +53,10 @@ public interface View {
     public int CHANGE_MODE_ADDED                                = 12;
     public int CHANGE_MODE_REMOVED                              = 13;
     public int CHANGE_MODE_CONSTRAINTS_CHANGED                  = 14;
+    
+    public int CHANGE_NBWINDOW_ADDED                          = 15;
+    public int CHANGE_NBWINDOW_REMOVED                        = 16;
+    public int CHANGE_NBWINDOW_BOUNDS_CHANGED                 = 17;
 
     
     // Mode level changes
@@ -104,7 +109,7 @@ public interface View {
     // XXX
     public Frame getMainWindow();
     
-    public Component getEditorAreaComponent();
+    public Component getEditorAreaComponent(NbWindowImpl window);
     
     public String guessSlideSide(TopComponent tc);
 

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.swing.JOptionPane;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.ModeImpl;
 
@@ -55,12 +56,38 @@ public class DockingStatus {
                 continue;
             
             List<String> views = model.getModeOpenedTopComponentsIDs( modeImpl );
+                        
             if( modeImpl.getKind() == Constants.MODE_KIND_VIEW ) {
-                docked.addAll( views );
-                slided.removeAll( views );
+                for(String id: views) {
+                    if(docked.contains(id))
+                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
+                    else
+                        docked.add(id);
+                }
+                //docked.addAll( views );
+                for(String id: views) {
+                    if(docked.contains(id))
+                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
+                    else
+                        slided.remove(id);
+                }
+                //slided.removeAll( views );
             } else if( modeImpl.getKind() == Constants.MODE_KIND_SLIDING ) {
-                docked.removeAll( views );
-                slided.addAll( views );
+                for(String id: views) {
+                    if(docked.contains(id))
+                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
+                    else
+                        docked.remove(id);
+                }
+                for(String id: views) {
+                    if(docked.contains(id))
+                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
+                    else
+                        slided.add(id);
+                }
+
+//                docked.removeAll( views );
+//                slided.addAll( views );
             }
         }
         marked = true;
@@ -91,8 +118,14 @@ public class DockingStatus {
      */
     public void addDocked( String tcID ) {
         if( null != tcID ) {
-            docked.add( tcID );
-            slided.remove( tcID );
+            if(docked.contains(tcID))
+                JOptionPane.showMessageDialog(null, "docked already contains " + tcID);
+            else
+                docked.add( tcID );
+            if(slided.contains(tcID))
+                JOptionPane.showMessageDialog(null, "slided already contains " + tcID);
+            else
+                slided.remove( tcID );
         }
     }
     

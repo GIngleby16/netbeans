@@ -34,6 +34,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
+import org.openide.windows.Mode;
 
 
 /** 
@@ -63,7 +64,7 @@ public abstract class AbstractModeContainer implements ModeContainer {
         this.tabbedHandler = new TabbedHandler(modeView, kind, createTabbed());
     }
 
-
+    
     public ModeView getModeView() {
         return modeView;
     }
@@ -134,7 +135,7 @@ public abstract class AbstractModeContainer implements ModeContainer {
         if (selectedTopComponent == null) {
             return;
         }
-
+                
         Window oldFocusedW = FocusManager.getCurrentManager().getFocusedWindow();
         Window newFocusedW = SwingUtilities.getWindowAncestor(selectedTopComponent);
         //#177550: Call requestFocus on selected TC only if TC is in AWT hierarchy
@@ -149,6 +150,25 @@ public abstract class AbstractModeContainer implements ModeContainer {
                 selectedTopComponent.requestFocus();
             }
         }
+        
+        // Check to see if focus did transfer to selected top component - or clear focus owner!
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Component focusedComponent = FocusManager.getCurrentManager().getFocusOwner();
+                if(focusedComponent != null) {
+                    // The selected top-component could have changed (if we are switching tabs, so we get selected top component)
+                    Mode activeMode = WindowManagerImpl.getInstance().getActiveMode();
+                    if(!SwingUtilities.isDescendingFrom(focusedComponent, WindowManagerImpl.getInstance().getSelectedTopComponent(activeMode))) {
+                        // try again?
+                        selectedTopComponent.requestFocusInWindow();
+                        if(!SwingUtilities.isDescendingFrom(focusedComponent, WindowManagerImpl.getInstance().getSelectedTopComponent(activeMode))) {
+                            FocusManager.getCurrentManager().clearFocusOwner();
+                        }
+                    }
+                }
+            }
+        });
     }
     
     public TopComponent[] getTopComponents() {
@@ -207,7 +227,7 @@ public abstract class AbstractModeContainer implements ModeContainer {
         if(transfer.isAllowedToMoveAnywhere()) {
             return true;
         }
-        
+                
         boolean isNonEditor = transfer.getKind() == Constants.MODE_KIND_VIEW || transfer.getKind() == Constants.MODE_KIND_SLIDING;
         boolean thisIsNonEditor = this.kind == Constants.MODE_KIND_VIEW || this.kind == Constants.MODE_KIND_SLIDING;
         return isNonEditor == thisIsNonEditor;

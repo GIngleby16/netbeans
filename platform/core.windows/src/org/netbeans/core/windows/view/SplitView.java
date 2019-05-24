@@ -32,6 +32,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import org.netbeans.core.windows.NbWindowImpl;
+import org.netbeans.core.windows.NbWindowTracker;
 
 
 /**
@@ -170,7 +172,9 @@ public class SplitView extends ViewElement {
                             arrViews[i] = views.get( i );
                             arrWeights[i] = weights.get( i ).doubleValue();
                         }
-                        getController().userMovedSplit( SplitView.this, arrViews, arrWeights );
+                        Window w = SwingUtilities.getWindowAncestor(splitPane);
+                        NbWindowImpl window = NbWindowTracker.getInstance().toNbWindow(w);
+                        getController().userMovedSplit( window, SplitView.this, arrViews, arrWeights );
                     }
                 });
         }

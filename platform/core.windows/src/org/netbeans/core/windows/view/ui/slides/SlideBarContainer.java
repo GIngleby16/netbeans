@@ -33,6 +33,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.view.ModeView;
@@ -56,10 +57,14 @@ public final class SlideBarContainer extends AbstractModeContainer {
     
     /** panel displaying content of this container */
     VisualPanel panel;
+    NbWindowImpl window;
     
     /** Creates a new instance of SlideBarContainer */
-    public SlideBarContainer(ModeView modeView, WindowDnDManager windowDnDManager) {
-        super(modeView, windowDnDManager, Constants.MODE_KIND_SLIDING);
+    public SlideBarContainer(NbWindowImpl window, ModeView modeView, WindowDnDManager windowDnDManager) {
+        super(modeView, windowDnDManager, Constants.MODE_KIND_SLIDING);        
+        this.window = window;
+        
+        
         
         panel = new VisualPanel(this);
         panel.setBorder(computeBorder(getSlidingView().getSide()));
@@ -111,8 +116,8 @@ public final class SlideBarContainer extends AbstractModeContainer {
     }
     
     @Override
-    protected Tabbed createTabbed() {
-        return new TabbedSlideAdapter(((SlidingView)modeView).getSide());
+    protected Tabbed createTabbed() {        
+        return new TabbedSlideAdapter(getSlidingView().getWindow(), ((SlidingView)modeView).getSide());
     }
     
     @Override
@@ -186,8 +191,7 @@ public final class SlideBarContainer extends AbstractModeContainer {
     /** Component enclosing slide boxes, implements needed interfaces to talk
      * to rest of winsys
      */
-    private static class VisualPanel extends JPanel implements ModeComponent, TopComponentDroppable {
-    
+    private static class VisualPanel extends JPanel implements ModeComponent, TopComponentDroppable {    
         private final SlideBarContainer modeContainer;
         private final String side;
 

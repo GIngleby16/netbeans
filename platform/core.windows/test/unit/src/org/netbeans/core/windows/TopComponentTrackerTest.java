@@ -41,9 +41,9 @@ public class TopComponentTrackerTest extends NbTestCase {
     }
      
     public void testViewTopComponent() throws Exception {
-        Mode viewMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode viewMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_VIEW, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
-        Mode editorMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode editorMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
         
         TopComponent viewTC = new PersistentTC("tc1");
@@ -72,9 +72,9 @@ public class TopComponentTrackerTest extends NbTestCase {
     }
      
     public void testSlidingMode() throws Exception {
-        Mode slidingMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode slidingMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
-        Mode editorMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode editorMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
         
         TopComponent viewTC = new PersistentTC("tc1");
@@ -103,9 +103,9 @@ public class TopComponentTrackerTest extends NbTestCase {
     }
      
     public void testEditorTopComponent() throws Exception {
-        Mode viewMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode viewMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_VIEW, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
-        Mode editorMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode editorMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
         
         TopComponentTracker tracker = TopComponentTracker.getDefault();
@@ -126,9 +126,9 @@ public class TopComponentTrackerTest extends NbTestCase {
     }
      
     public void testNonPersistentTopComponent() throws Exception {
-        Mode viewMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode viewMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_VIEW, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
-        Mode editorMode = WindowManagerImpl.getInstance().createMode(null,
+        Mode editorMode = WindowManagerImpl.getInstance().createMode(null, null,
                 Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true, new SplitConstraint[0] );
         
         TopComponentTracker tracker = TopComponentTracker.getDefault();

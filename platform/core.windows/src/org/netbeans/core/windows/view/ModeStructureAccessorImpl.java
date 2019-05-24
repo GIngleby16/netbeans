@@ -31,6 +31,8 @@ import java.awt.*;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import org.netbeans.core.windows.NbWindowImpl;
+import org.netbeans.core.windows.NbWindowStructureSnapshot.NbWindowSnapshot;
 
 
 /**
@@ -40,55 +42,51 @@ import java.util.Set;
  * @author  Peter Zavadsky
  */
 final class ModeStructureAccessorImpl implements ModeStructureAccessor {
-    
-    private final ElementAccessor splitRootAccessor;
-    
+    private final Map<NbWindowAccessor, WindowModeStructureAccessor> windowModeStructureAccessors;
     private final Set<ModeAccessor> separateModeAccessors;
     
-    private final Set<SlidingAccessor> slidingModeAccessors;
-    
+
     /** Creates a new instance of ModesModelAccessorImpl. */
-    public ModeStructureAccessorImpl(ElementAccessor splitRootAccessor, 
-            Set<ModeAccessor> separateModeAccessors, 
-            Set<SlidingAccessor> slidingModeAccessors) {
-        this.splitRootAccessor = splitRootAccessor;
+    public ModeStructureAccessorImpl(Map<NbWindowAccessor, WindowModeStructureAccessor> windowModeStructureAccessors,Set<ModeAccessor> separateModeAccessors) {
+        this.windowModeStructureAccessors = windowModeStructureAccessors;
         this.separateModeAccessors = separateModeAccessors;
-        this.slidingModeAccessors = slidingModeAccessors;
     }
 
     @Override
-    public ElementAccessor getSplitRootAccessor() {
-        return splitRootAccessor;
+    public Map<NbWindowAccessor, WindowModeStructureAccessor> getWindowModeStructureAccessor() {
+        return windowModeStructureAccessors;
     }
-    
+        
+
     @Override
     public ModeAccessor[] getSeparateModeAccessors() {
         return separateModeAccessors.toArray(new ModeAccessor[0]);
     }
     
-    @Override
-    public SlidingAccessor[] getSlidingModeAccessors() {
-        return slidingModeAccessors.toArray(new SlidingAccessor[0]);
-    }
-
     /** @param name name of mode */
     public ModeAccessor findModeAccessor(String name) {
-        ModeAccessor ma = findModeAccessorOfName(splitRootAccessor, name);
-        if(ma != null) {
-            return ma;
-        }
+        ModeAccessor ma;
         
+        for(WindowModeStructureAccessor windowAccessor: windowModeStructureAccessors.values()) {        
+             ma = findModeAccessorOfName(windowAccessor.getSplitRootAccessor(), name);
+            if(ma != null) {
+                return ma;
+            }
+        }
+                
         for(Iterator it = separateModeAccessors.iterator(); it.hasNext(); ) {
             ma = (ModeAccessor)it.next();
             if(name.equals(ma.getName())) {
                 return ma;
             }
         }
-        
-        for(Iterator it = slidingModeAccessors.iterator(); it.hasNext(); ) {
-            ma = (ModeAccessor)it.next();
-            if(name.equals(ma.getName())) {
-                return ma;
+
+        for(WindowModeStructureAccessor windowAccessor: windowModeStructureAccessors.values()) {        
+            for(Iterator it = windowAccessor.getSlidingModeAccessors().iterator(); it.hasNext(); ) {
+                ma = (ModeAccessor)it.next();
+                if(name.equals(ma.getName())) {
+                    return ma;
+                }
             }
         }
         
@@ -299,15 +297,18 @@ final class ModeStructureAccessorImpl implements ModeStructureAccessor {
 
         private final String side;
         private final Map<TopComponent,Integer> slideInSizes;
+        private final NbWindowSnapshot windowSnapshot;  
         
-        public SlidingAccessorImpl(ModelElement originator, 
+        public SlidingAccessorImpl(NbWindowSnapshot windowSnapshot, ModelElement originator, 
                 ModeStructureSnapshot.ModeSnapshot snapshot, 
                 String side, Map<TopComponent,Integer> slideInSizes) {
             super(originator, snapshot);
 
             this.side = side;
             this.slideInSizes = slideInSizes;
+            this.windowSnapshot = windowSnapshot;
         }
+        
     
         @Override
         public String getSide() {
@@ -326,8 +327,10 @@ final class ModeStructureAccessorImpl implements ModeStructureAccessor {
             }
             
             // XXX Even if originators are same, they differ if their side are different.
-            SlidingAccessor me = (SlidingAccessor)o;
-            return getSide() == me.getSide();
+            SlidingAccessorImpl me = (SlidingAccessorImpl)o;
+            boolean isSameSide = getSide() == me.getSide();
+            boolean isSameWindow = (this.windowSnapshot.getNbWindow() == me.windowSnapshot.getNbWindow()); // gwi had to compare window too!
+            return isSameSide && isSameWindow;
         }
         
     } // end of SlidingAccessorImpl
@@ -365,13 +368,31 @@ final class ModeStructureAccessorImpl implements ModeStructureAccessor {
     
         @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("\nModesAccessorImpl hashCode=" + hashCode()); // NOI18N
-        sb.append("\nSplit modes:\n"); // NOI18N
-        sb.append(dumpAccessor(splitRootAccessor, 0)); 
+        StringBuilder sb = new StringBuilder();        
+        sb.append("ModesAccessorImpl hashCode=" + Integer.toHexString(hashCode()) + "\n"); // NOI18N
+        for(NbWindowAccessor windowAccessor: windowModeStructureAccessors.keySet()) {
+            WindowModeStructureAccessor wmsa = windowModeStructureAccessors.get(windowAccessor);
+            
+            NbWindowImpl window = windowAccessor.getNbWindow();
+            
+            sb.append("Window " + (window==null?"NbMainWindow":window.getName()) + "\n");            
+            sb.append("SplitRoot\n");
+            sb.append(dumpAccessor(wmsa.getSplitRootAccessor(), 0)); 
+            sb.append("Sliding\n");
+            sb.append(dumpSet(wmsa.getSlidingModeAccessors()));
+        }        
         sb.append("\nSeparate Modes:"); // NOI18N
         sb.append(dumpSet(separateModeAccessors));
         return sb.toString();
+
+
+//        StringBuffer sb = new StringBuffer();
+//        sb.append("\nModesAccessorImpl hashCode=" + hashCode()); // NOI18N
+//        sb.append("\nSplit modes:\n"); // NOI18N
+//        sb.append(dumpAccessor(splitRootAccessor, 0)); 
+//        sb.append("\nSeparate Modes:"); // NOI18N
+//        sb.append(dumpSet(separateModeAccessors));
+//        return sb.toString();
     }
     
     private static String dumpAccessor(ElementAccessor accessor, int indent) {
@@ -415,6 +436,10 @@ final class ModeStructureAccessorImpl implements ModeStructureAccessor {
         return sb.toString();
     }
     
-    
+    //TODO gwi: implemented getAuxSplitRootAccessors
+//    @Override
+//    public Map<AuxWindowStructureSnapshot.AuxWindowSnapshot, ElementAccessor> getAuxSplitRootAccessors() {
+//        return auxSplitRootAccessors;
+//    }    
 }
 

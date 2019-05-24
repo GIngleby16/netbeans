@@ -41,6 +41,8 @@ import java.util.Set;
  * to paint 'drag under' indications for that container. 
  *
  *
+ * Modified Graeme to correct drop indication issue in two windows
+ * 
  * @author  Peter Zavadsky
  *
  * @see java.awt.dnd.DropTarget
@@ -149,8 +151,16 @@ public final class DropTargetGlassPane extends JPanel implements DropTargetListe
             } else {
                 currentPainter = null;
             }
+            if(tp != null) {
+                // Fix bug where previous drop indication was in another glass pane that missed an exit? (two drop indications visible at same time)
+                DropTargetGlassPane lgp = tp.get();
+                if(lgp != null && lgp != this) { 
+                    lgp.clearIndications();
+                }
+            }            
             currentDropIndication = s;
             componentUnderCursor = c; 
+            tp = new WeakReference<>(this);
             if( null != currentDropIndication ) {
                 Rectangle rect = currentDropIndication.getBounds();
                 rect = SwingUtilities.convertRectangle(c, rect, this );
@@ -225,7 +235,8 @@ public final class DropTargetGlassPane extends JPanel implements DropTargetListe
     private Shape currentDropIndication;
     private EnhancedDragPainter currentPainter;
     private Component componentUnderCursor;
-
+    private static WeakReference<DropTargetGlassPane> tp; // Graeme - remember last GP that paints drop indication, repaint it when drop indication cleared
+    
     @Override
     public void paint(Graphics g) {
         if( null != currentDropIndication ) {

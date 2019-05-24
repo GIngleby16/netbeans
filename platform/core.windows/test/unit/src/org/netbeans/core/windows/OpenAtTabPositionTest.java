@@ -40,7 +40,7 @@ public class OpenAtTabPositionTest extends NbTestCase {
     }
      
     public void testIsOpenedAtRightPosition () throws Exception {
-        Mode mode = WindowManagerImpl.getInstance().createMode("testIsOpenedAtRightPositionMode",
+        Mode mode = WindowManagerImpl.getInstance().createMode(null, "testIsOpenedAtRightPositionMode",
                 Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, false, new SplitConstraint[0] );
         
         TopComponent firstTC = new TopComponent();

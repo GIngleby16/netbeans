@@ -33,7 +33,6 @@ import org.openide.windows.TopComponent;
 
 import javax.swing.*;
 import java.awt.*;
-import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 import org.netbeans.swing.tabcontrol.customtabs.TabbedComponentFactory;
 import org.netbeans.swing.tabcontrol.customtabs.TabbedType;

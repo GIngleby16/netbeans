@@ -43,6 +43,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.AWTEventListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.Switches;
 import org.netbeans.core.windows.view.ui.slides.SlideBar;
@@ -332,7 +333,9 @@ public final class TabbedHandler implements ChangeListener, ActionListener {
                     Component tabbedComp = tabbed.getComponent();
 
                     String side = WindowManagerImpl.getInstance().guessSlideSide(tc);
-                    SlideOperation operation = SlideOperationFactory.createSlideIntoEdge(
+                    ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(tc);
+                    NbWindowImpl window = WindowManagerImpl.getInstance().getWindowForMode(mode);
+                    SlideOperation operation = SlideOperationFactory.createSlideIntoEdge(window,
                         tabbedComp, side, true);
                     operation.setStartBounds(
                            new Rectangle(tabbedComp.getLocationOnScreen(), tabbedComp.getSize()));
@@ -347,7 +350,8 @@ public final class TabbedHandler implements ChangeListener, ActionListener {
                     WindowManagerImpl wm = WindowManagerImpl.getInstance();
                     ModeImpl mode = ( ModeImpl ) wm.findMode( tc );
                     if( null != mode ) {
-                        wm.userMinimizedMode( mode );
+                        NbWindowImpl window = wm.getWindowForMode(mode);
+                        wm.userMinimizedMode( window, mode );
                     }
                 }
             } else if (TabbedContainer.COMMAND_RESTORE_GROUP.equals(cmd)) {
@@ -539,6 +543,14 @@ public final class TabbedHandler implements ChangeListener, ActionListener {
             original = orig;
             disable = disableActivation;
         }
+
+        @Override
+        public NbWindowImpl getNbWindow() {
+            return original.getNbWindow();
+        }
+        
+        
+        
         
         @Override
         public Component getComponent() {

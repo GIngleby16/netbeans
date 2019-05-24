@@ -85,7 +85,7 @@ final class EditorSplitSubModel extends SplitSubModel {
     
     
     /** Class which represents editor area position in EditorSplitSubModel. */
-    static class EditorNode extends SplitSubModel.Node {
+     static class EditorNode extends SplitSubModel.Node {  //TODO gwi: temporarily made public so SplitSubModel.dumpNode can dump the inner editorArea!
         /** Ref to editor area. */
         private final SplitSubModel editorArea;
         
@@ -113,6 +113,9 @@ final class EditorSplitSubModel extends SplitSubModel {
             return new ModeStructureSnapshot.EditorSnapshot(this, null,
                 editorArea.createSplitSnapshot(), getResizeWeight());
         }
+
+        
+        
     } // End of nested EditorNode class.
     
     

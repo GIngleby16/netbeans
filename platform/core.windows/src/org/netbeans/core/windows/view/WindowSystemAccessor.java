@@ -22,6 +22,7 @@ package org.netbeans.core.windows.view;
 
 
 import java.awt.*;
+import java.util.Map;
 
 
 /**
@@ -60,11 +61,16 @@ interface WindowSystemAccessor {
     public ModeAccessor getActiveModeAccessor();
     
     /** Gets maximized mode. */
-    public ModeAccessor getMaximizedModeAccessor();
+    public Map<NbWindowAccessor, ModeAccessor> getMaximizedModeAccessor();
     
     public ModeStructureAccessor getModeStructureAccessor();
     
     public ModeAccessor findModeAccessor(String modeName);
+ 
     
+    // NEW ------------------------------------------------------------------
+    
+//    public AuxWindowStructureAccessor getAuxWindowStructureAccessor();
+
 }
 

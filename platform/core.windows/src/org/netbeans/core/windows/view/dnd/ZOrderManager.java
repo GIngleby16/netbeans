@@ -19,31 +19,29 @@
 
 package org.netbeans.core.windows.view.dnd;
 
-import java.awt.Component;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.lang.IllegalArgumentException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.swing.JComponent;
-import javax.swing.RepaintManager;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
+import org.netbeans.core.windows.view.ui.MainWindow;
 import org.openide.windows.WindowManager;
 
-/** Holds and manages z-order of attached windows.
+/**
+ * Holds and manages z-order of attached windows.
  *
  * Note, manager is NetBeans specific, not general. It automatically attaches
- * main window and expects that all registered zOrder are always above
- * this main window.
+ * main window and expects that all registered zOrder are always above this main
+ * window.
  *
  * Not thread safe, must be called from EQT.
  *
@@ -51,67 +49,89 @@ import org.openide.windows.WindowManager;
  */
 public final class ZOrderManager extends WindowAdapter {
 
-    /** Singleton instance */
+    /**
+     * Singleton instance
+     */
     private static ZOrderManager instance;
 
     private static Logger logger = Logger.getLogger("org.netbeans.core.windows.view.dnd");
 
-    /** Z-order list of pane containers (windows) */
+    /**
+     * Z-order list of pane containers (windows)
+     */
     private List<WeakReference<RootPaneContainer>> zOrder = new ArrayList<WeakReference<RootPaneContainer>>();
 
-    /** Set of pane containers to temporarily exclude from z-ordering. */
+    /**
+     * Set of pane containers to temporarily exclude from z-ordering.
+     */
     private Set<WeakReference<RootPaneContainer>> excludeSet = new HashSet<WeakReference<RootPaneContainer>>();
 
-
-    /** Creates a new instance of ZOrderManager */
+    private List<String> zOrderCapture = new ArrayList<String>();
+    
+    /**
+     * Creates a new instance of ZOrderManager
+     */
     private ZOrderManager() {
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            attachWindow(MainWindow.getInstance().getFrame());
+        }
+
     }
 
-    /** Returns singleton instance of ZOrderManager */
-    public static ZOrderManager getInstance () {
+    /**
+     * Returns singleton instance of ZOrderManager
+     */
+    public static ZOrderManager getInstance() {
         if (instance == null) {
             instance = new ZOrderManager();
         }
         return instance;
     }
 
-    /** Adds given window (RootPaneContainer) to the set of windows which are tracked.
+    /**
+     * Adds given window (RootPaneContainer) to the set of windows which are
+     * tracked.
      */
-    public void attachWindow (RootPaneContainer rpc) {
+    public void attachWindow(RootPaneContainer rpc) {
         logger.entering(getClass().getName(), "attachWindow");
 
         if (!(rpc instanceof Window)) {
             throw new IllegalArgumentException("Argument must be subclas of java.awt.Window: " + rpc);   //NOI18N
         }
+        System.out.println("ZOrderManager:detachWindow " + ((Window)rpc).getName());        
         if (getWeak(rpc) != null) {
             throw new IllegalArgumentException("Window already attached: " + rpc);   //NOI18N
         }
 
         zOrder.add(new WeakReference<RootPaneContainer>(rpc));
-        ((Window)rpc).addWindowListener(this);
+        ((Window) rpc).addWindowListener(this);
     }
 
-    /** Stops to track given window (RootPaneContainer).
+    /**
+     * Stops to track given window (RootPaneContainer).
      */
-    public boolean detachWindow (RootPaneContainer rpc) {
+    public boolean detachWindow(RootPaneContainer rpc) {
         logger.entering(getClass().getName(), "detachWindow");
 
         if (!(rpc instanceof Window)) {
             throw new IllegalArgumentException("Argument must be subclas of java.awt.Window: " + rpc);   //NOI18N
         }
+        System.out.println("ZOrderManager:detachWindow " + ((Window)rpc).getName());
 
         WeakReference<RootPaneContainer> ww = getWeak(rpc);
         if (ww == null) {
             return false;
         }
 
-        ((Window)rpc).removeWindowListener(this);
+        ((Window) rpc).removeWindowListener(this);
         return zOrder.remove(ww);
     }
 
-    /** Excludes/reincludes given RootPaneContainer from z-ordering. Excluded RootPaneContainer
-     * never returns true from isOnTop call, even if it is on top of window stack.
-     * RootPaneContainer that is second on top is returned in such situation.
+    /**
+     * Excludes/reincludes given RootPaneContainer from z-ordering. Excluded
+     * RootPaneContainer never returns true from isOnTop call, even if it is on
+     * top of window stack. RootPaneContainer that is second on top is returned
+     * in such situation.
      *
      * Used to distinguish RootPaneContainer that is being dragged.
      *
@@ -119,7 +139,7 @@ public final class ZOrderManager extends WindowAdapter {
      * @param exclude true when exclusion is needed, false when normal default
      * behaviour is desirable.
      */
-    public void setExcludeFromOrder (RootPaneContainer rpc, boolean exclude) {
+    public void setExcludeFromOrder(RootPaneContainer rpc, boolean exclude) {
         if (exclude) {
             excludeSet.add(new WeakReference<RootPaneContainer>(rpc));
         } else {
@@ -132,33 +152,34 @@ public final class ZOrderManager extends WindowAdapter {
 
     /* Stops to track all windows registered before.
      */
-    public void clear () {
+    public void clear() {
         RootPaneContainer rpc;
         for (WeakReference<RootPaneContainer> elem : zOrder) {
             rpc = elem.get();
             if (rpc != null) {
-                ((Window)rpc).removeWindowListener(this);
+                ((Window) rpc).removeWindowListener(this);
             }
         }
         zOrder.clear();
     }
 
-    /** Finds out whether given pane container (window) is not under any other
+    /**
+     * Finds out whether given pane container (window) is not under any other
      * window registered in this manager at given screen point.
      *
      * @param rpc Pane container (window)
      * @param screenLoc point relative to screen
-     * @return true when given window is on top of other registered windows at given point
+     * @return true when given window is on top of other registered windows at
+     * given point
      */
-    public boolean isOnTop (RootPaneContainer rpc, Point screenLoc) {
+    public boolean isOnTop(RootPaneContainer rpc, Point screenLoc) {
         logger.entering(getClass().getName(), "isOnTop");
-        
+
         /*JComponent cp = (JComponent) rpc.getContentPane();
         // false if point in dirty region - probably overlapped by other window
         if (RepaintManager.currentManager(cp).getDirtyRegion(cp).contains(screenLoc)) {
             return false;
         }*/
-
         int size = zOrder.size();
         WeakReference<RootPaneContainer> curWeakW = null;
         RootPaneContainer curRpc = null;
@@ -181,7 +202,7 @@ public final class ZOrderManager extends WindowAdapter {
             Point loc = new Point(screenLoc);
             SwingUtilities.convertPointFromScreen(loc, curW);
             if (curW.contains(loc)) {
-                    // && !RepaintManager.currentManager(curComp).getDirtyRegion(curComp).contains(screenLoc)) {
+                // && !RepaintManager.currentManager(curComp).getDirtyRegion(curComp).contains(screenLoc)) {
                 return false;
             }
         }
@@ -195,8 +216,9 @@ public final class ZOrderManager extends WindowAdapter {
         return false;
     }
 
-    /*** Implementation of WindowListener ******/
-
+    /**
+     * * Implementation of WindowListener *****
+     */
     public void windowOpened(WindowEvent e) {
     }
 
@@ -206,11 +228,25 @@ public final class ZOrderManager extends WindowAdapter {
     public void windowActivated(WindowEvent e) {
         logger.entering(getClass().getName(), "windowActivated");
 
-        WeakReference<RootPaneContainer> ww = getWeak((RootPaneContainer)e.getWindow());
+        WeakReference<RootPaneContainer> ww = getWeak((RootPaneContainer) e.getWindow());
         if (ww != null) {
-            // place as last item in zOrder list
-            zOrder.remove(ww);
-            zOrder.add(ww);
+            if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+                // create parent chain
+                List<Window> chain = new ArrayList<Window>();
+                Window w = (Window) ww.get();
+                while (w != null) {
+                    chain.add(w);
+                    w = (Window) w.getParent();
+                }
+                // move parent chain in order
+                for (Window c : chain) {
+                    moveWindowPlusOwned(c);
+                }
+            } else {
+                // original functionality
+                zOrder.remove(ww);
+                zOrder.add(ww);
+            }
         } else {
             throw new IllegalArgumentException("Window not attached: " + e.getWindow()); //NOI18N
         }
@@ -219,8 +255,7 @@ public final class ZOrderManager extends WindowAdapter {
     public void windowDeactivated(WindowEvent e) {
     }
 
-
-    private WeakReference<RootPaneContainer> getWeak (RootPaneContainer rpc) {
+    private WeakReference<RootPaneContainer> getWeak(RootPaneContainer rpc) {
         for (WeakReference<RootPaneContainer> elem : zOrder) {
             if (elem.get() == rpc) {
                 return elem;
@@ -229,7 +264,7 @@ public final class ZOrderManager extends WindowAdapter {
         return null;
     }
 
-    private WeakReference<RootPaneContainer> getExcludedWeak (RootPaneContainer rpc) {
+    private WeakReference<RootPaneContainer> getExcludedWeak(RootPaneContainer rpc) {
         for (WeakReference<RootPaneContainer> elem : excludeSet) {
             if (elem.get() == rpc) {
                 return elem;
@@ -238,5 +273,45 @@ public final class ZOrderManager extends WindowAdapter {
         return null;
     }
 
-}
+    private void moveWindowPlusOwned(Window w) {
+        WeakReference<RootPaneContainer> wr = getWeak((RootPaneContainer) w);
+        zOrder.remove(wr);
+        zOrder.add(wr);
+        // move any owned dialogs to last (in the order they are in)
+        List<WeakReference<RootPaneContainer>> zOrderClone = new ArrayList<WeakReference<RootPaneContainer>>(zOrder);
+        HashSet<Window> ownedWindows = new HashSet<Window>(Arrays.asList(w.getOwnedWindows()));
+        if (!ownedWindows.isEmpty()) {
+            for (WeakReference<RootPaneContainer> ref : zOrderClone) {
+                RootPaneContainer r = ref.get();
+                Window wx = (Window) ref.get();
+                if (ownedWindows.contains(r)) {
+                    zOrder.remove(ref);
+                    zOrder.add(ref);
+                    moveWindowPlusOwned(wx);
+                }
+            }
+        }
+    }
 
+    public String[] getZOrder() {
+        return zOrderCapture.toArray(new String[zOrderCapture.size()]);
+    }
+    
+    public void setCapturedZOrder(String[] ids) {
+        zOrderCapture.clear();
+        zOrderCapture.addAll(Arrays.asList(ids));
+    }
+        
+    public void captureZOrder() {
+        zOrderCapture.clear();
+        for (WeakReference<RootPaneContainer> ref : zOrder) {
+            RootPaneContainer rpc = ref.get();
+            if (rpc != null) {
+                Window w = (Window) SwingUtilities.getAncestorOfClass(Window.class, rpc.getContentPane());
+                if (w != null) {
+                    zOrderCapture.add(w.getName());
+                }
+            }
+        }
+    }
+}

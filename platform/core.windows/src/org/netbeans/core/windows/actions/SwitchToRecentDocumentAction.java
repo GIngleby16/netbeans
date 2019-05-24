@@ -32,6 +32,7 @@ import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Iterator;
+import org.netbeans.core.windows.NbWindowImpl;
 
 
 /**
@@ -66,8 +67,9 @@ implements PropertyChangeListener {
             
             if(mode.getKind() == Constants.MODE_KIND_EDITOR) {
                 // #37030 Unmaximize other mode if needed.
-                if(mode != wm.getCurrentMaximizedMode()) {
-                    wm.switchMaximizedMode(null);
+                NbWindowImpl window = wm.getWindowForMode(mode);
+                if(mode != wm.getCurrentMaximizedMode(window)) { // TODO gwi-max: null window?
+                    wm.switchMaximizedMode(window, null);
                 }
                 TopComponent tc = wm.findTopComponent(tcId);
                 if( null != tc ) {

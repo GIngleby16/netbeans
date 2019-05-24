@@ -31,6 +31,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.ModeImpl;
 import org.netbeans.core.windows.TopComponentTracker;
@@ -126,8 +127,9 @@ public final class RecentViewListAction extends AbstractAction
         // #37226 Unmaximized the other mode if needed.
         WindowManagerImpl wm = WindowManagerImpl.getInstance();
         ModeImpl mode = (ModeImpl) wm.findMode(tc);
-        if(mode != null && mode != wm.getCurrentMaximizedMode()) {
-            wm.switchMaximizedMode(null);
+        NbWindowImpl window = wm.getWindowForMode(mode);
+        if(mode != null && mode != wm.getCurrentMaximizedMode(window)) {  // TODO gwi-max: null window?
+            wm.switchMaximizedMode(window, null);
         }
         
         tc.requestActive();
