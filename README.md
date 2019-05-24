@@ -147,8 +147,6 @@ An enhanced window manager for Apache NetBeans that supports splitting secondary
 
 ![NetBeans Animation](docs/nb-animation.gif)
 
-**_Finally:_ Arrange Top Components (Editors & Views) in additional windows just like you would in the main window!**
-
 ## Background
 The NetBeans WindowManager has a long history and it has changed considerably over the years.  Some of these changes have lead to behavior that is inconsistent/unexpected. 
 
@@ -232,8 +230,6 @@ For example: **Moving this editor**<br><br>
 The goal of this project is to provide a replacement NetBeans Window Manager with enhanced, **consistent** functionality and to give developers using the **NetBeans Platform** a little more control over how their applications behave and look.
 
 The new Window Manager should be backward compatible with existing applications and should be capable of reading existing persisted mode configurations.
-
-Please read the expandable section (More Details...) in [Background](#background) to understand the current Window Manager inconsistencies/bugs.
 
 Summary of New Features
 * [Consistent TopComponent layout across all windows](#consistent-topcomponent-layout-across-all-windows)
