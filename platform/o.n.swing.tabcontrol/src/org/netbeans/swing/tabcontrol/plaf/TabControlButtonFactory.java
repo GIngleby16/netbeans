@@ -239,11 +239,17 @@ public class TabControlButtonFactory {
         @Override
         public void addNotify() {
             super.addNotify();
-            //#205194 - cannot minimize floating tab group
-            Window w = SwingUtilities.getWindowAncestor( displayer );
-            boolean isFloating = w != WindowManager.getDefault().getMainWindow();
-            if( isFloating )
-                setVisible( false );
+            // we want the min button visible in the main or nbwindow
+            Window w = SwingUtilities.getWindowAncestor( displayer );            
+            boolean isNbWindowFrame = WindowManager.getDefault().isNbWindow(w);
+            if(isNbWindowFrame) {
+                // we want the button visible
+            } else {
+                // we want the button hidden in floating windows (but visible in main)
+                boolean isFloating = w != WindowManager.getDefault().getMainWindow();
+                if( isFloating )
+                    setVisible( false );
+            }            
         }
     }
     

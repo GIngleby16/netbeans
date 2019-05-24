@@ -25,6 +25,10 @@ package org.netbeans.swing.tabcontrol;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collection;
+import org.openide.util.Lookup;
+import org.openide.windows.IconSelector;
+import org.openide.windows.TopComponent;
 
 /**
  * Class representing data needed to represent a component in a tab. While
@@ -63,8 +67,23 @@ public final class TabData implements Comparable {
         icon = i;
         txt = caption;
         tip = tooltip;
+        
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            icon = null;
+            // only show icons if we are told to
+            if(userObject instanceof TopComponent) {
+                TopComponent tc = (TopComponent)userObject;
+                Collection<? extends IconSelector> selectors = Lookup.getDefault().lookupAll(IconSelector.class);
+                for (IconSelector s : selectors) {
+                    icon = s.getIconForTopComponent(tc, i);
+                    if(icon != null) {
+                        break;
+                    }                
+                }
+            }
+        } 
     }
-    
+   
     
     public Object getUserObject() {
         return userObject;

@@ -99,7 +99,7 @@ public class AquaViewTabDisplayerUI extends AbstractViewTabDisplayerUI {
     }
 
     @Override
-    protected void paintTabContent(Graphics g, int index, String text, int x,
+    protected void paintTabContent(Graphics g, int index, String text, Icon icon, int x,
                                    int y, int width, int height) {
         FontMetrics fm = getTxtFontMetrics();
 
@@ -150,6 +150,13 @@ public class AquaViewTabDisplayerUI extends AbstractViewTabDisplayerUI {
             textW -= busyIcon.getIconWidth() - 3 - TXT_X_PAD;
             busyIcon.paintIcon( displayer, g, textX, y+(height-busyIcon.getIconHeight())/2);
             textX += busyIcon.getIconWidth() + 3;
+        } else {        
+            // GWI paint icon - not painting in correct position!
+            if(icon != null) {
+                textW -= icon.getIconWidth() - 3 - TXT_X_PAD;
+                icon.paintIcon(displayer, g, textX+TXT_X_PAD, y+(height-icon.getIconHeight())/2);
+                textX += icon.getIconWidth() + 3;
+            }
         }
 
         int realTextWidth = (int)HtmlRenderer.renderString(text, g, textX, textY, textW, height, getTxtFont(),

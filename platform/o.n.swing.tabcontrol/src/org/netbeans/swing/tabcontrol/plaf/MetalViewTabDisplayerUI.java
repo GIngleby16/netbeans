@@ -123,7 +123,7 @@ public final class MetalViewTabDisplayerUI extends AbstractViewTabDisplayerUI {
     }
 
     @Override
-    protected void paintTabContent(Graphics g, int index, String text, int x,
+    protected void paintTabContent(Graphics g, int index, String text, Icon icon, int x,
                                    int y, int width, int height) {
         boolean slidedOut = false;
         WinsysInfoForTabbedContainer winsysInfo = displayer.getContainerWinsysInfo();
@@ -154,6 +154,13 @@ public final class MetalViewTabDisplayerUI extends AbstractViewTabDisplayerUI {
                 txtWidth -= busyIcon.getIconWidth() - 3 - TXT_X_PAD;
                 busyIcon.paintIcon( displayer, g, x+TXT_X_PAD, y+(height-busyIcon.getIconHeight())/2);
                 x += busyIcon.getIconWidth() + 3;
+            } else {        
+                // GWI paint icon
+                if(icon != null) {
+                    txtWidth -= icon.getIconWidth() - 3 - TXT_X_PAD;
+                    icon.paintIcon(displayer, g, x+TXT_X_PAD, y+(height-icon.getIconHeight())/2);
+                    x += icon.getIconWidth() + 3;
+                }
             }
 
             txtWidth = (int)HtmlRenderer.renderString(text, g, x + TXT_X_PAD, height -
