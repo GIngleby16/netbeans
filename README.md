@@ -20,8 +20,8 @@
 -->
 #### This project is a Fork of the Apache NetBeans repo [apache/netbeans](https://github.com/apache/netbeans)
 <details>
-  <summary>Original NetBeans ReadMe</summary>
-    
+  <summary>Click to read: Original NetBeans ReadMe</summary>
+        
 # Apache NetBeans
 
 Apache NetBeans is an open source development environment, tooling platform, and application framework.
@@ -138,22 +138,20 @@ Many thanks to Emilian Bold who converted the ancient history to his
 [Git repository](https://github.com/emilianbold/netbeans-releases)
 and made the magic possible!
 </details>
-<hr>
 
-**_This is a work in progress the code is experimental and subject to frequent changes_**
+**This is a work in progress the code is experimental and subject to frequent changes**
+<hr>
 
 # Apache NetBeans with WindowManager<sup>2</sup>
 An enhanced window manager for Apache NetBeans that supports splitting secondary windows and more
 
 ![NetBeans Animation](docs/nb-animation.gif)
 
-**_Finally:_ Arrange Top Components (Editors & Views) in additional windows just like you would in the main window!**
-
 ## Background
 The NetBeans WindowManager has a long history and it has changed considerably over the years.  Some of these changes have lead to behavior that is inconsistent/unexpected. 
 
 <details>
-  <summary>More details...</summary>
+  <summary>Click to read: The Current Window Manager Inconsistencies</summary>
   <br>
 <p>Once there was a main editor region surrounded by ancilliary views.  These ancilliary views could be docked in regions above, below and to the side of the main editor region but Editors and Views could not be mixed within the same dockable regions.  Users could divide up their main window to show as much useful information as possible.</p>
    
@@ -227,13 +225,11 @@ For example: **Moving this editor**<br><br>
 </p>
 </details>
 
-## Goal
+## Project Goal
 
 The goal of this project is to provide a replacement NetBeans Window Manager with enhanced, **consistent** functionality and to give developers using the **NetBeans Platform** a little more control over how their applications behave and look.
 
 The new Window Manager should be backward compatible with existing applications and should be capable of reading existing persisted mode configurations.
-
-Please read the expandable section (More Details...) in [Background](#background) to understand the current Window Manager inconsistencies/bugs.
 
 Summary of New Features
 * [Consistent TopComponent layout across all windows](#consistent-topcomponent-layout-across-all-windows)
