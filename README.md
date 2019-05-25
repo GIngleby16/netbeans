@@ -296,6 +296,10 @@ WindowManager<sup>2</sup> will use [EditorSelector](#editorselector) to determin
 
 WindowManager<sup>2</sup> **will always** display icons for **Editor** TopComponents and will **never** display icons for  **View** TopComponents.
 
+<p align="center">
+  <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/TabIcons.png'>
+</p>
+
 This behavior can be altered using [IconSelector](#iconselector).  A simple setting change can instruct WindowManager<sup>2</sup>'s DefaultIconSelector to **always** display icons for **both Editors & Views**.
 
 ### Consistent Editor Status Bar Visibility
