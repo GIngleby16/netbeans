@@ -279,7 +279,7 @@ $ ant tryme
 WindowManager<sup>2</sup> allow users to layout TopComponents (Editors & Views) in complex arrangements in secondary (aka Floating) windows.  Secondary/Floating windows can have Sliding modes.
 <br>
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/complex.png'>
+  <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/FloatingWindow.png'>
 </p>
 
 ### Consistent Window Creation
