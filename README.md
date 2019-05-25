@@ -244,11 +244,11 @@ Summary of New Features
 
 The following modules were modified:
 
-* platform/core.windows
-* platform/openide.windows
-* platform/openide.text
-* platform/o.n.swing.tabcontrol
-* ide/editor
+* [platform/openide.windows](#platform-openidewindows)
+* [platform/core.windows](#platform-corewindows)
+* [platform/openide.text](#platform-openidetext)
+* [platform/o.n.swing.tabcontrol](#platform-onswingtabcontrol)
+* [ide/editor](#ide-editor)
 
 ### Building NetBeans With WindowManager<sup>2</sup>
 
@@ -452,3 +452,23 @@ public class DefaultNbWindowSelector implements NbWindowSelector {
 The default implementation will always create a **Dialog** based window.
 
 <sup>Note:</sup><br>The argument **_netbeans.winsys.enhanced.nbWindow.nbwindow-frames=true** can be used to change the behavior to create a new **Frame** based window when dropping an **Editor**. A new **Dialog** based window will be created when dropping a **View** (non-editor).
+
+### Platform openide.windows
+
+This module was updated to enhance The Window Manager API with methods to support NbWindow.  
+
+### Platform core.windows
+
+The most significant updates were performed in this module to implement the WindowManager2 features.
+
+### Platform o.n.swing.tabcontrol
+
+This module was updated to support displaying icons for Editor Top Components in tab controls for view based modes.
+
+### Platform openide.text
+
+Added DefaultEditorSelector a default service provider implementation that would determine if a TopComponent is an editor if its lookup contains an Editor cookie.
+
+### IDE editor
+
+org.netbeans.modules.editor.impl.StatusLineFactories - this class was modified to  make sure editor status lines are made visible in Dialogs that implement NbWindow.
