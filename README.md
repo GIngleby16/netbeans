@@ -272,7 +272,7 @@ $ ant tryme
 
 **Note:** Look in nbbuild/netbeans for the NetBeans installation created by the build process.
 
-# The Details
+# What's New
 
 ## Consistent TopComponent layout across all windows
 
