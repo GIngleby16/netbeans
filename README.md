@@ -145,7 +145,7 @@ and made the magic possible!
 # Apache NetBeans with WindowManager<sup>2</sup>
 An enhanced window manager for Apache NetBeans that supports splitting secondary windows and more
 
-![NetBeans Animation](docs/nb-animation.gif)
+![NetBeans IDE](contrib/gingleby/docs/NetBeansWindowManager2.png)
 
 ## Background
 The NetBeans WindowManager has a long history and it has changed considerably over the years.  Some of these changes have lead to behavior that is inconsistent/unexpected. 
