@@ -242,7 +242,7 @@ Summary of New Features
 * [EditorSelector](#editorselector)
 * [NbWindowSelector](#nbwindowselector)
 
-## Building NetBeans With WindowManager<sup>2</sup>
+### Building NetBeans With WindowManager<sup>2</sup>
 
 Build with the default config (See the [cluster.config](https://github.com/apache/netbeans/blob/ab66c7fdfdcbf0bde67b96ddb075c83451cdd1a6/nbbuild/cluster.properties#L19) property.)
 ```
@@ -263,7 +263,7 @@ $ ant -Dcluster.config=platform
 
 **Note:** You can also use `php`, `enterprise`, etc. See the [cluster.properties](https://github.com/apache/netbeans/blob/master/nbbuild/cluster.properties) file.
 
-## Running NetBeans With WindowManager<sup>2</sup>
+### Running NetBeans With WindowManager<sup>2</sup>
 
 Run the build:
 ```
