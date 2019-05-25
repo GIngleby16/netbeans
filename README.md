@@ -286,7 +286,7 @@ WindowManager<sup>2</sup> allow users to layout TopComponents (Editors & Views) 
 
 WindowManager<sup>2</sup> will create **Dialog** based windows that stay visible above the main window for _all_ TopComponents dropped outside the main window.
 
-This behavior can be altered using [NbWindowSelector](#nbwindowselector).  A simple setting change can instruct WindowManager<sup>2</sup> to create **Frame** based windows for **Editors** and **Dialog** based windows for **Views**.
+This behavior can be altered using [NbWindowSelector](#nbwindowselector).  A simple setting change can instruct WindowManager<sup>2</sup>'s DefaultNbWindowSelector to create **Frame** based windows for **Editors** and **Dialog** based windows for **Views**.
 
 ### Consistent Editor detection
 
