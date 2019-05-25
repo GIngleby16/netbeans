@@ -2199,6 +2199,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         return null;
     }
 
+    @Override
     public boolean isEditor(TopComponent tc) {
         Collection<? extends EditorSelector> selectors = Lookup.getDefault().lookupAll(EditorSelector.class);
         for (EditorSelector s : selectors) {

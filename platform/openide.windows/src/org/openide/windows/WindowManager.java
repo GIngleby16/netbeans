@@ -98,6 +98,7 @@ public abstract class WindowManager extends Object implements Serializable {
     public abstract Set<NbWindow> getNbWindows(); 
     public abstract NbWindow findNbWindow(String name);
     public abstract boolean isNbWindow(Window window); 
+    public abstract boolean isEditor(TopComponent topComponent);
 
     /** Finds mode of specified name.
      * @return <code>Mode</code> whith the specified name is or <code>null</code>

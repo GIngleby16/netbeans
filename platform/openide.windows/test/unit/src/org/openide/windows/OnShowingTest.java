@@ -209,6 +209,11 @@ public class OnShowingTest extends NbTestCase {
             }
             // -----------------------------------------------------------------------
 
+            @Override
+            public boolean isEditor(TopComponent topComponent) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
         }
         );
     }

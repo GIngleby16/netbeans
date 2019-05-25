@@ -448,6 +448,11 @@ final class DummyWindowManager extends WindowManager {
     public NbWindow findNbWindow(String name) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }    
+
+    @Override
+    public boolean isEditor(TopComponent topComponent) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     // -----------------------------------------------------------------------
     
