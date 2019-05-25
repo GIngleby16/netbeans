@@ -37,6 +37,7 @@ import org.netbeans.swing.tabcontrol.event.TabActionEvent;
 import org.netbeans.swing.tabcontrol.plaf.TabControlButton;
 import org.netbeans.swing.tabcontrol.plaf.TabControlButtonFactory;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * The basic UI of a tab displayer component.  Defines the API of the UI for
@@ -222,6 +223,20 @@ public abstract class TabDisplayerUI extends ComponentUI {
         return false;
     }
 
+    public final boolean isTabEditor( int tabIndex ) {
+        WinsysInfoForTabbedContainer winsysInfo = displayer.getContainerWinsysInfo();
+        if( null == winsysInfo )
+            return false;
+        TabDataModel model = displayer.getModel();
+        if( tabIndex < 0 || tabIndex >= model.size() )
+            return false;
+        TabData td = model.getTab( tabIndex );
+        if( td.getComponent() instanceof TopComponent ) {
+            return WindowManager.getDefault().isEditor((TopComponent)td.getComponent() );
+        }
+        return false;
+    }
+    
     /**
      * Installs the selection model into the tab control via a package private
      * method.

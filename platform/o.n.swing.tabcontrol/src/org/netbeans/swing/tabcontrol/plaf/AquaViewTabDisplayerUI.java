@@ -40,6 +40,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
 import org.netbeans.swing.tabcontrol.WinsysInfoForTabbedContainer;
+import org.openide.windows.WindowManager;
 
 /**
  * A view tabs ui for OS-X adapted from the view tabs UI for Metal.
@@ -153,9 +154,12 @@ public class AquaViewTabDisplayerUI extends AbstractViewTabDisplayerUI {
         } else {        
             // GWI paint icon - not painting in correct position!
             if(icon != null) {
-                textW -= icon.getIconWidth() - 3 - TXT_X_PAD;
-                icon.paintIcon(displayer, g, textX+TXT_X_PAD, y+(height-icon.getIconHeight())/2);
-                textX += icon.getIconWidth() + 3;
+                // we should only paint icons for editors
+                if(isTabEditor(index)) {
+                    textW -= icon.getIconWidth() -3;
+                    icon.paintIcon(displayer, g, textX, y+(height-icon.getIconHeight())/2);
+                    textX += icon.getIconWidth();
+                }
             }
         }
 
