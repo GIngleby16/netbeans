@@ -274,7 +274,7 @@ $ ant tryme
 
 # What's New
 
-## Consistent TopComponent layout across all windows
+### Consistent TopComponent layout across all windows
 
 WindowManager<sup>2</sup> allow users to layout TopComponents (Editors & Views) in complex arrangements in secondary (aka Floating) windows.  Secondary/Floating windows can have Sliding modes.
 <br>
@@ -282,33 +282,33 @@ WindowManager<sup>2</sup> allow users to layout TopComponents (Editors & Views) 
   <img style="display: flex; margin: auto" align="center" src='/docs/complex.png'>
 </p>
 
-## Consistent Window Creation
+### Consistent Window Creation
 
 WindowManager<sup>2</sup> will create **Dialog** based windows that stay visible above the main window for _all_ TopComponents dropped outside the main window.
 
 This behavior can be altered using [NbWindowSelector](#nbwindowselector).  A simple setting change can instruct WindowManager<sup>2</sup> to create **Frame** based windows for **Editors** and **Dialog** based windows for **Views**.
 
-## Consistent Editor detection
+### Consistent Editor detection
 
 WindowManager<sup>2</sup> will use [EditorSelector](#editorselector) to determine if a TopComponent is an editor.  The result will be consistent regardless of the location or **mode** a TopComponent is docked into.
 
-## Consistent Tab Icon Visibility
+### Consistent Tab Icon Visibility
 
 WindowManager<sup>2</sup> **will always** display icons in **Editor** tabs and will **never** display icons in **View** tabs.
 
 This behavior can be altered using [IconSelector](#iconselector).  A simple setting change can instruct WindowManager<sup>2</sup> to **always** display icons for **both Editors & Views**.
 
-## Consistent Editor Status Bar Visibility
+### Consistent Editor Status Bar Visibility
 
 WindowManager<sup>2</sup> will display editor status bars in both **Frame** and **Dialog** based windows _(if the window contains an Editor)_.
 
-## Consistent Z-ordering
+### Consistent Z-ordering
 
 WindowManager<sup>2</sup> will correctly track **Frame** and **Dialog** based windows z-order.  When an application is relaunched the windows will be recreated (and thus overlap) in the same order they were when the application exited.
 
 Tracking the correct z-order will also allow WindowManager<sup>2</sup> to correctly display the intended drop location.
 
-## IconSelector 
+### IconSelector 
 
 IconSelector is a ServiceProvider interface that can be used to determine:
 1. If an icon should be displayed in a Modes TabContainer
@@ -358,7 +358,7 @@ WindowManager<sup>2</sup> uses a new ServiceProvider interface to consistently d
 
 <sup>Note:</sup><br>The argument **_netbeans.winsys.enhanced.tab-icons=true_** can be used to change the behavior of the DefaultIconSelector so that the requested icon is always used (Both Editors and Views will have icons)
 
-## EditorSelector 
+### EditorSelector 
 
 EditorSelector is a ServiceProvider interface that can be used to determine if a TopComponent is an Editor.  ServiceProvider implementations will be be called _(in an undeterministic order)_.  The first provider to return **true** will indicate the TopComponent is an Editor.
 
@@ -401,7 +401,7 @@ public class DefaultIconSelector implements IconSelector {
 
 The default implementation will return **true** for any TopComponent that has an EditorCookie in its lookup.  NetBeans Platform developers can easily provide additional implementations for determing if a TopComponent is an Editor.
 
-## NbWindowSelector
+### NbWindowSelector
 
 NbWindowSelector is a ServiceProvider interface that can be used to determine what type of window should be created when a TopComponent is dropped in free-space.  NbWindowSelector implementations will be called _(in an undeterministic order)_.  The first implementation that returns **true** will indicate a **Dialog** based window is required.
 
