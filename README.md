@@ -242,9 +242,35 @@ Summary of New Features
 * [EditorSelector](#editorselector)
 * [NbWindowSelector](#nbwindowselector)
 
-## Integration
+## Building NetBeans With WindowManager<sup>2</sup>
 
-Provide instructions for using the new Window Manager here!
+Build with the default config (See the [cluster.config](https://github.com/apache/netbeans/blob/ab66c7fdfdcbf0bde67b96ddb075c83451cdd1a6/nbbuild/cluster.properties#L19) property.)
+```
+$ ant
+```
+Build the basic project (mainly, JavaSE features):
+```
+$ ant -Dcluster.config=basic
+```
+Build the full project (including Groovy, PHP, JavaEE/JakartaEE, and JavaScript features):
+```
+$ ant -Dcluster.config=full
+```
+Build the NetBeans Platform:
+```
+$ ant -Dcluster.config=platform
+```
+
+**Note:** You can also use `php`, `enterprise`, etc. See the [cluster.properties](https://github.com/apache/netbeans/blob/master/nbbuild/cluster.properties) file.
+
+## Running NetBeans With WindowManager<sup>2</sup>
+
+Run the build:
+```
+$ ant tryme
+```
+
+**Note:** Look in nbbuild/netbeans for the NetBeans installation created by the build process.
 
 # The Details
 
