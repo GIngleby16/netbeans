@@ -294,9 +294,9 @@ WindowManager<sup>2</sup> will use [EditorSelector](#editorselector) to determin
 
 ### Consistent Tab Icon Visibility
 
-WindowManager<sup>2</sup> **will always** display icons in **Editor** tabs and will **never** display icons in **View** tabs.
+WindowManager<sup>2</sup> **will always** display icons for **Editor** TopComponents and will **never** display icons for  **View** TopComponents.
 
-This behavior can be altered using [IconSelector](#iconselector).  A simple setting change can instruct WindowManager<sup>2</sup> to **always** display icons for **both Editors & Views**.
+This behavior can be altered using [IconSelector](#iconselector).  A simple setting change can instruct WindowManager<sup>2</sup>'s DefaultIconSelector to **always** display icons for **both Editors & Views**.
 
 ### Consistent Editor Status Bar Visibility
 
