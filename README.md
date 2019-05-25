@@ -242,6 +242,14 @@ Summary of New Features
 * [EditorSelector](#editorselector)
 * [NbWindowSelector](#nbwindowselector)
 
+The following modules were modified:
+
+* platform/core.windows
+* platform/openide.windows
+* platform/openide.text
+* platform/o.n.swing.tabcontrol
+* ide/editor
+
 ### Building NetBeans With WindowManager<sup>2</sup>
 
 Build with the default config (See the [cluster.config](https://github.com/apache/netbeans/blob/ab66c7fdfdcbf0bde67b96ddb075c83451cdd1a6/nbbuild/cluster.properties#L19) property.)
