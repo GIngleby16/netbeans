@@ -153,75 +153,88 @@ The NetBeans WindowManager has a long history and it has changed considerably ov
 <details>
   <summary>Click to read: The Current Window Manager Inconsistencies</summary>
   <br>
-<p>Once there was a main editor region surrounded by ancilliary views.  These ancilliary views could be docked in regions above, below and to the side of the main editor region but Editors and Views could not be mixed within the same dockable regions.  Users could divide up their main window to show as much useful information as possible.</p>
+    
+In NetBeans a mode (usually visually represented by a Tabbed container) is a place between splitters in the main window.  Separate floating windows contain a single mode.
    
-As the IDE grew and more and more ancilliary views were added (and displays became a little larger) users wanted the ability to drag editors/view into spearate windows.  
-  
-* Dragging an Editor into a separate window created a Frame based child window - which could be placed either above or below the main window.
+The IDE default layout comprises a main editor region that is always visible (for opening documents) surrounded by a number of ancilliary modes (known as View modes) as seen here:
 
-* Dragging a View (non editor) into a separate window created a Dialog based child window - which would always remain visible above the main window.
-
-These separate windows could not be split (to show multiple editors/views at the same time) like the main window.  Instead they were tab based - displaying one item at a time that filled the display area.
-
-**Functionality was consistent but fairly simple.**
-
-Eventually users were allowed to mix Editors and Views in the same dockable regions - partly because similar behavior was available in other IDEs and partly because NetBeans Platform users  (developers creating their own applications based on NetBeans APIs) didn't always have as clear a distinction between editors and views.   Some views could allow updates and some editors could 
-be read-only.
-
-**This was where the complexity and inconsistencies began:**
-
-Editor tabs display icons while View based tabs were more compact and did not display icons.  
-Dragging an editor from the Editor region into a View based dockable region would result in an
-Editor tab with no icon - the Editor from a user perspective was still an Editor but from a 
-WindowManager perspective it was now a view!  
-
-Dragging an Editor out of a View based region and into a separate window would result in a Dialog
-based window rather than a Frame based window (had the editor been dragged from the editor region).
-Because the main window could be split horizontally and vertically into many sections it wasn't always
-obvious which region was the main editor region and which regions were view specific regions.
-
-View regions can be minimized into slide out regions (but the editor region can't).
-
-Copied from other sections to be cleaned up...
-
-The current NetBeans Window Manager will create a **Frame** based floating window if the TopComponent was dragged from the editor mode. It will create a **Dialog** based floating window if a TopComponent was dragged from any mode outside the editor region.
-
-Therefore, dropping the same editor TopComponent outside the main window could sometimes result in the creation of a Dialog and sometimes a Frame.
-
-The current NetBeans Window Manager determines if a TopComponent is an **Editor** or a **View** based on the mode the TopComponent is docked into. [(see DevFaqWindowsMode)](http://wiki.netbeans.org/DevFaqWindowsMode)
-
-There are 3 mode types:
-
-* MODE_KIND_EDITOR
-* MODE_KIND_VIEW
-* MODE_KIND_SLIDING
-
-This means a TopComponent can transition from being an Editor or a View based on the location it's displayed in the GUI. In reality a TopComponent that provides Editor capabilities is an Editor no matter where it's located.
-
-The current Editor detection based on modes leads to inconsistencies in:
-* Tab displays (icon vs no icon)
-* Floating window creation  (Frame vs Dialog)
-* Status Bar visibility (Frames have status bars, dialogs do not)
-
-NetBeans currently displays icons on tabs in the Editor mode.  All other modes display more compact tabs without images.  When you drag an Editor (e.g. Java File) from the Editor mode into a View mode (e.g. the Output mode below the Editor region) the icon is dropped and the tab looks less like an Editor tab and more like a View tab.
-
-This new WindowManager will display icons for Editors regardless of the mode they are contained in.
-
-For example: **Moving this editor**<br><br>
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/tabs-before.png'>
+  <img style="display: flex; margin: auto" align="center" src='/docs/layout.png'>
 </p>
-<br>
 
-**Results in this...**<br><br>
+TopComponents can have a default mode where they are initially opened.
+
+TopComponents can be "**floated**" by using the Float menu action or by dragging and dropping a TopComponent outside the main window.  When a TopComponent is **floated** a **Floating Window** is created.
+
+TopComponents can be moved from one mode to another (changing their location on screen).  TopComponents in an Editor mode can be moved to a View mode and vice-versa TopComponents in a View mode can be moved into an Editor mode.
+
+The current NetBeans Window Manager determines if a TopComponent is an **Editor** or a **View** based on the **mode** the TopComponent is docked into. [(see DevFaqWindowsMode)](http://wiki.netbeans.org/DevFaqWindowsMode)
+
+Swing does not track z-order for windows (only components within windows).  The NetBeans WindowManager implementation contains a class called **ZOrderManager**. The javadoc for **ZOrderManager** states:
+<pre>
+ Holds and manages z-order of attached windows.
+ 
+ Note, manager is NetBeans specific, not general. It automatically attaches
+ main window and expects that all registered zOrder are always above this main
+ window.
+ 
+ Not thread safe, must be called from EQT.
+</pre>
+
+The features described above lead to the following inconsistent behaviors:
+
+### Z-order
+
+* When NetBeans is restarted it restores the previous state. Modes and Floating windows that were open when the application closed are reopened. However NetBeans does not persist the Z-Order information. The windows to open are returned in an un-ordered set. If you had overlapping windows they may overlap in a different order after a restart.
+
+* Floating a TopComponent from an **Editor** mode results in a **Frame** based window that can be positioned behined the main window. **This breaks the API contract described in ZOrderManager**  
+
+* NetBeans cannot correctly track the drop-location when a Frame based window is positioned below the main window.  As seen here: 
+
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/tabs-after.png'>
+  <img style="display: flex; margin: auto" align="center" src='/docs/zorder1.png'>
 </p>
-<br>
 
-**Rather than...**<br><br>
+**_The drop location should have been in the main window output mode below the main editor region and not in the floating window below the main window._**
+
+It's also possible to have multiple drop-locations visible at the same time:  As seen here:
+
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/tabs-after-current.png'>
+  <img style="display: flex; margin: auto" align="center" src='/docs/zorder2.png'>
+</p>
+
+### Tab Displays
+
+* Tabs in **Editor** modes contain icons
+* Tabs in **View** modes do not contain icons
+
+This makes it hard for a user to identify a TopComponent that is used for editing a document once the TopComponent is moved out of an **Editor** mode and into a **View** mode.
+
+### Floating Window Creation
+
+* **Floating** a TopComponent located in an **Editor** mode would create a **Frame** based floating window.  A frame based window can be positioned above or below the main window and can be minimized or maximized.  
+
+* **Floating** a TopComponent located in one of the surrounding **View** modes would create a **Dialog** based window.  A dialog window is always positioned above the main window and cannot be minimized or maximized.  
+
+From a user perspective a TopComponent used for editing a document is always an editor regardless of the mode it is located in.  Floating one of these TopComponents can sometimes create a **Frame** and sometimes create a **Dialog**.  Due to the nature of mode splitting it's not always obvious which regions are **View** modes.
+
+### Status Bar Visibility
+
+* A **Frame** based window displays a status bar that can display the current edit location (cursor row/column).  
+* A **Dialog** based window does not display a status bar.  
+
+A TopComponent that is used for editing a document can be displayed in both **Frame** and **Dialog** windows.  The status bar visibility can therefore be inconsistent.
+
+A document editor in a **Frame** based window:
+
+<p align="center">
+  <img style="display: flex; margin: auto" align="center" src='/docs/frame1.png'>
+</p>
+
+The same document editor (TopComponent) in a **Dialog** based window:
+
+<p align="center">
+  <img style="display: flex; margin: auto" align="center" src='/docs/dialog1.png'>
 </p>
 </details>
 
