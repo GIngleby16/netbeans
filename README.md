@@ -303,6 +303,8 @@ WindowManager<sup>2</sup> allow users to layout TopComponents (Editors & Views) 
   <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/FloatingWindow.png'>
 </p>
 
+**_Note the image above shows TopComponents arranged in a Floating window (not the main window)_**
+
 ### Consistent Window Creation
 
 WindowManager<sup>2</sup> will create **Dialog** based windows that stay visible above the main window for _all_ TopComponents dropped outside the main window.
