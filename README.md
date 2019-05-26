@@ -504,3 +504,25 @@ Added DefaultEditorSelector a default service provider implementation that would
 ### IDE editor
 
 org.netbeans.modules.editor.impl.StatusLineFactories - this class was modified to  make sure editor status lines are made visible in Dialogs that implement NbWindow.
+
+# Debugging
+
+Some API methods have had their visibility changed to public (from protected or private).  These changes were performed to quickly integrate a debug window that provided visibility to model internal values.   When the API is more stable the visibility will be changed back.
+
+In contrib/gingleby there is a NetBeansDND NetBeans Platform application.  It contains two modules (NetBeansDNDModule and WindowManagerSpy).   NetBeansDNDModule is a simple application with some test TopComponents (Editors and Views) that can be used to test the drag/drop capability.  
+
+WindowManagerSpy displays a debug window that allows you to:
+
+* Invoke the garbage collector
+* View groups
+* View DockingStatus (minimized, maximized, default status)
+* View Modes:mode2Model mapping
+* View ModesSubModel:editorSplitSubModel
+* View ModesSubModel:modes mapping
+* View ModesSubModel:sides mapping (sliding modes)
+* View ModesSubModel:mode2NbWindow (map of mode to floating window)
+* View TopComponentRegistry listener events
+* View TopComponentRegistry content
+* View ViewHierarchy (For each window/split root map)
+* View WindowManager listener
+* View z-order for all windows
