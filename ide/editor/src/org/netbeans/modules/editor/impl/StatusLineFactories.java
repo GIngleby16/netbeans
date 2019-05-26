@@ -20,7 +20,9 @@ package org.netbeans.modules.editor.impl;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -44,7 +46,6 @@ import org.openide.awt.StatusDisplayer.Message;
 import org.openide.awt.StatusLineElementProvider;
 import org.openide.util.RequestProcessor;
 import org.openide.util.lookup.ServiceProvider;
-import org.openide.windows.WindowManager;
 
 
 /**
@@ -113,8 +114,13 @@ public final class StatusLineFactories {
         LOG.fine("StatusLineFactories.refreshStatusLine()\n");
         List<? extends JTextComponent> componentList = EditorRegistry.componentList();
         for (JTextComponent component : componentList) {
-            boolean underMainWindow = (SwingUtilities.isDescendingFrom(component,
-                    WindowManager.getDefault().getMainWindow()));
+//            boolean underMainWindow = (SwingUtilities.isDescendingFrom(component, WindowManager.getDefault().getMainWindow()));  // Removed by GWI
+
+            // GWI The check above fails for Dialogs because a Dialogs parent will be the MainWindow, 
+            // GWI This check works for both dialogs and frames
+            Container ancestor = SwingUtilities.getAncestorOfClass(Window.class, component);
+            boolean underMainWindow = ancestor != null && "NbMainWindow".equals(ancestor.getName());
+            // 
             EditorUI editorUI = Utilities.getEditorUI(component);
             if (LOG.isLoggable(Level.FINE)) {
                 String componentDesc = component.toString();
