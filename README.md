@@ -302,6 +302,10 @@ $ ant tryme
 * This project has not been tested for performance problems
 * This project has not been tested for memory leaks
 
+## Reporting Bugs
+
+Issues should be reported here: https://github.com/GIngleby16/netbeans/issues
+
 # What's New
 
 ### Consistent TopComponent layout across all windows
