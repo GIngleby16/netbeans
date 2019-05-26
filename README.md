@@ -159,7 +159,7 @@ In NetBeans a mode (usually visually represented by a Tabbed container) is a pla
 The IDE default layout comprises a main editor region that is always visible (for opening documents) surrounded by a number of ancilliary modes (known as View modes) as seen here:
 
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/layout.png'>
+  <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/layout.png'>
 </p>
 
 TopComponents can have a default mode where they are initially opened.
@@ -192,7 +192,7 @@ The features described above lead to the following inconsistent behaviors:
 * NetBeans cannot correctly track the drop-location when a Frame based window is positioned below the main window.  As seen here: 
 
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/zorder1.png'>
+  <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/zorder1.png'>
 </p>
 
 **_The drop location should have been in the main window output mode below the main editor region and not in the floating window below the main window._**
@@ -200,7 +200,7 @@ The features described above lead to the following inconsistent behaviors:
 It's also possible to have multiple drop-locations visible at the same time:  As seen here:
 
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/zorder2.png'>
+  <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/zorder2.png'>
 </p>
 
 ### Tab Displays
@@ -228,13 +228,13 @@ A TopComponent that is used for editing a document can be displayed in both **Fr
 A document editor in a **Frame** based window:
 
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/frame1.png'>
+  <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/frame1.png'>
 </p>
 
 The same document editor (TopComponent) in a **Dialog** based window:
 
 <p align="center">
-  <img style="display: flex; margin: auto" align="center" src='/docs/dialog1.png'>
+  <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/dialog1.png'>
 </p>
 </details>
 
