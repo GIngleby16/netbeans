@@ -203,6 +203,8 @@ It's also possible to have multiple drop-locations visible at the same time:  As
   <img style="display: flex; margin: auto" align="center" src='contrib/gingleby/docs/zorder2.png'>
 </p>
 
+**_Only one of these drop locations is valid!_**
+
 ### Tab Displays
 
 * Tabs in **Editor** modes contain icons
