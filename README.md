@@ -151,7 +151,7 @@ An enhanced window manager for Apache NetBeans that supports splitting secondary
 The NetBeans WindowManager has a long history and it has changed considerably over the years.  Some of these changes have lead to behavior that is inconsistent/unexpected. 
 
 <details>
-  <summary>Click to read: The Current Window Manager Inconsistencies</summary>
+  <summary>Click to read more about these inconsistencies</summary>
   <br>
     
 In NetBeans a mode (usually visually represented by a Tabbed container) is a place between splitters in the main window.  Separate floating windows contain a single mode.
