@@ -2290,20 +2290,20 @@ final class Central implements ControllerHandler {
                 window = (NbWindowImpl)WindowManagerImpl.getInstance().createNbWindow(nbWindowName, bounds, Boolean.TRUE.equals(isDialogRequested)); 
 
             // a  nbwindow name can be changed via setName - ? Should that be allowed ? Should we also have a UID?
-            ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_editor", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true);  
-            model.addMode(window, newMode, new SplitConstraint[0]);
-
-            ModeImpl newMode2 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_bottomSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
-            model.addSlidingMode(window, newMode2, "bottom", null);
-
-            ModeImpl newMode3 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_rightSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
-            model.addSlidingMode(window, newMode3, "right", null);
-
-            ModeImpl newMode4 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_leftSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
-            model.addSlidingMode(window, newMode4, "left", null);
-
-            ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true); 
-            model.addSlidingMode(window, newMode5, "top", null);
+//            ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_editor", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true);  
+//            model.addMode(window, newMode, new SplitConstraint[0]);
+//
+//            ModeImpl newMode2 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_bottomSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
+//            model.addSlidingMode(window, newMode2, "bottom", null);
+//
+//            ModeImpl newMode3 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_rightSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
+//            model.addSlidingMode(window, newMode3, "right", null);
+//
+//            ModeImpl newMode4 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_leftSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
+//            model.addSlidingMode(window, newMode4, "left", null);
+//
+//            ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true); 
+//            model.addSlidingMode(window, newMode5, "top", null);
                 
                 
                
@@ -3368,21 +3368,21 @@ final class Central implements ControllerHandler {
         model.createNbWindowModel(window, name, bounds);
         
 //        if(defaultModes) {        
-//            // a nbwindow name can be changed via setName - ? Should that be allowed ? Should we also have a UID?
-//            ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(name + "_editor", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true);  
-//            model.addMode(window, newMode, new SplitConstraint[0]);
-//
-//            ModeImpl newMode2 = WindowManagerImpl.getInstance().createModeImpl(name + "_bottomSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true); 
-//            model.addSlidingMode(window, newMode2, "bottom", null);
-//
-//            ModeImpl newMode3 = WindowManagerImpl.getInstance().createModeImpl(name + "_rightSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
-//            model.addSlidingMode(window, newMode3, "right", null);
-//
-//            ModeImpl newMode4 = WindowManagerImpl.getInstance().createModeImpl(name + "_leftSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
-//            model.addSlidingMode(window, newMode4, "left", null);
-//
-//            ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(name + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
-//            model.addSlidingMode(window, newMode5, "top", null);
+            // a nbwindow name can be changed via setName - ? Should that be allowed ? Should we also have a UID?
+            ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(name + "_editor", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true);  
+            model.addMode(window, newMode, new SplitConstraint[0]);
+
+            ModeImpl newMode2 = WindowManagerImpl.getInstance().createModeImpl(name + "_bottomSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true); 
+            model.addSlidingMode(window, newMode2, "bottom", null);
+
+            ModeImpl newMode3 = WindowManagerImpl.getInstance().createModeImpl(name + "_rightSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
+            model.addSlidingMode(window, newMode3, "right", null);
+
+            ModeImpl newMode4 = WindowManagerImpl.getInstance().createModeImpl(name + "_leftSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
+            model.addSlidingMode(window, newMode4, "left", null);
+
+            ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(name + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
+            model.addSlidingMode(window, newMode5, "top", null);
 //        }
         
         viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, null));
