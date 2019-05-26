@@ -293,7 +293,7 @@ $ ant tryme
 
 **Note:** Look in nbbuild/netbeans for the NetBeans installation created by the build process.
 
-# Potential Problems
+# Potential Problems (Disclaimer)
 
 * This project has not been tested with the many plugins that modify WindowManager behavior
 * This project has not been tested on many platforms (main development was performed on a Windows based machine with some functionality tests performed on a Mac/OsX)
