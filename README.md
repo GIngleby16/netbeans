@@ -296,7 +296,9 @@ $ ant tryme
 ## Potential Problems (Disclaimer)
 
 * This project has not been tested with the many plugins that modify WindowManager behavior
-* This project has not been tested on many platforms (main development was performed on a Windows based machine with some functionality tests performed on a Mac/OsX)
+* This project has not been tested on many platforms 
+    * Main development performed on a Windows based machine 
+    * Some tests performed on a Mac/OsX
 * This project has not been tested extensively with custom mode configurations, persistent vs non-persistent TopComponents, etc.
 * This project has not been tested by many users
 * This project has not been tested for performance problems
