@@ -2668,11 +2668,18 @@ final class Central implements ControllerHandler {
         if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
             // new behavior - create a nbwindow
             String nbWindowName = getUnusedNbWindowName();
-            // TODO gwi-window: Need a way to determine frame or dialog
-            WindowManagerImpl.getInstance().createNbWindow(nbWindowName, bounds, false);
-            
-            // need to create default modes!
 
+            // TODO gwi-window: Need a way to determine frame or dialog
+            Collection<? extends NbWindowSelector> selectors = Lookup.getDefault().lookupAll(NbWindowSelector.class);
+            Boolean isDialogRequested = null;
+            for (NbWindowSelector s : selectors) {
+                isDialogRequested = s.isDialogRequested(tc);
+                if(isDialogRequested != null) {
+                    break;
+                }                
+            }
+            WindowManagerImpl.getInstance().createNbWindow(nbWindowName, bounds, isDialogRequested);
+            
             // move top component into mode
             ModeImpl nbMode = null;
             String name = nbWindowName + "_editor";
