@@ -1903,8 +1903,16 @@ final class Central implements ControllerHandler {
      * inside main window. False if component lives inside separate window.
      */
     public boolean isDocked (TopComponent comp) {
-        ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(comp);
-        return mode != null && mode.getState() == Constants.MODE_STATE_JOINED;
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            // modified logic to determine if a mode is floated
+            ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(comp);
+            NbWindowImpl window = model.getWindowForMode(mode);
+            return window == null; 
+        } else {
+            // original method
+            ModeImpl mode = (ModeImpl)WindowManagerImpl.getInstance().findMode(comp);
+            return mode != null && mode.getState() == Constants.MODE_STATE_JOINED;
+        }
     }
 
     
@@ -2733,17 +2741,16 @@ final class Central implements ControllerHandler {
                     // create mode with the same constraints to dock topcomponent back into
                     dockTo = WindowManagerImpl.getInstance().createModeImpl(
                             ModeImpl.getUnusedModeName(), modeKind, false);
-                    model.addMode(null, dockTo, constraints);  // TODO gwi: user docked top component will use main window?
+                    model.addMode(null, dockTo, constraints);  
                 }
             }
         }
         
         if (dockTo == null) {
-            JOptionPane.showMessageDialog(null, "What window to use?");
             // fallback, previous saved mode not found somehow, use default modes
             dockTo = modeKind == Constants.MODE_KIND_EDITOR
-                    ? WindowManagerImpl.getInstance().getDefaultEditorMode(null) //TODO gwi: WHAT WINDOW TO USE?
-                    : WindowManagerImpl.getInstance().getDefaultViewMode(null);  //TODO gwi: WHAT WINDOW TO USE?
+                    ? WindowManagerImpl.getInstance().getDefaultEditorMode(null) 
+                    : WindowManagerImpl.getInstance().getDefaultViewMode(null);  
         }
         moveTopComponentIntoMode(dockTo, tc, dockIndex);
         NbWindowImpl window = getWindowForMode(dockTo);
