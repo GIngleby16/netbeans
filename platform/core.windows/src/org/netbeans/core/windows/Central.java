@@ -2365,8 +2365,20 @@ final class Central implements ControllerHandler {
         if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
             // new behavior - create a nbwindow
             String nbWindowName = getUnusedNbWindowName();
+            
+            // In this unique case we'll use the selected top component to determine type
+            TopComponent tc = mode.getSelectedTopComponent();
+            Collection<? extends NbWindowSelector> selectors = Lookup.getDefault().lookupAll(NbWindowSelector.class);
+            Boolean isDialogRequested = null;
+            for (NbWindowSelector s : selectors) {
+                isDialogRequested = s.isDialogRequested(tc);
+                if(isDialogRequested != null) {
+                    break;
+                }                
+            }
+            
             //TODO gwi-window: Need a way to determine if we need a frame or a dialog
-            WindowManagerImpl.getInstance().createNbWindow(nbWindowName, modeBounds, false); // do I need to adjust size  to accomodate frame?
+            WindowManagerImpl.getInstance().createNbWindow(nbWindowName, modeBounds, isDialogRequested); // do I need to adjust size  to accomodate frame?
 
             ModeImpl nbMode = null;
             String name = nbWindowName + "_editor";
