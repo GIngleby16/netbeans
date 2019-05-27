@@ -740,7 +740,7 @@ final class ViewHierarchy {
         if(window != null) {
             Window frame = (Window)win2Frame.get(window);            
             if (frame == null) {
-                if(window.isDialogRequested()) {
+                if(window.isDialog()) {
                     frame = new NbWindowDialog(window, window.getBounds(), controller);
                 } else {
                     frame = new NbWindowFrame(window, window.getBounds(), controller);
@@ -1478,8 +1478,8 @@ final class ViewHierarchy {
                 for (NbWindow window : windows) {
                     NbWindowImpl win = (NbWindowImpl) window;
                     if (win.getName().equals(id) && win.isVisible()) {
-                        NbWindowFrame frame = (NbWindowFrame)NbWindowTracker.getInstance().toWindow(win);
-                        frame.setVisible(true);
+                        Window nbWindow = (Window)NbWindowTracker.getInstance().toWindow(win);
+                        nbWindow.setVisible(true);
                     }
                 }
             }

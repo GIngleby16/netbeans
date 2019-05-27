@@ -27,11 +27,13 @@ import java.awt.Rectangle;
 public class NbWindowConfig {
     private String name;
     private Rectangle bounds;
+    private boolean isDialog;
     
-    public NbWindowConfig(String name, Rectangle bounds) {
+    public NbWindowConfig(String name, Rectangle bounds, boolean isDialog) {
         this.name = name;
         this.bounds = bounds;
-    }
+        this.isDialog = isDialog;
+    }    
 
     public String getName() {
         return name;
@@ -40,4 +42,9 @@ public class NbWindowConfig {
     public Rectangle getBounds() {
         return bounds;
     }
+    
+    public boolean isDialog() {
+        return true;
+    }
+        
 }

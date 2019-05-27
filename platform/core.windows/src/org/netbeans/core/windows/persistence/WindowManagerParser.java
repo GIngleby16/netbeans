@@ -1011,9 +1011,7 @@ public class WindowManagerParser {
                     Integer.parseInt(attrs.getValue("width")), 
                     Integer.parseInt(attrs.getValue("height"))); // should use attribute bound values
             
-            // TODO gwi-window: Going to need an attribute for dialog vs frame
-            // false will always create an NbWindowFrame not NbWindowDialog
-            NbWindow nbWindow = WindowManagerImpl.getInstance().createNbWindow(attrs.getValue("name"), bounds, false); 
+            NbWindow nbWindow = WindowManagerImpl.getInstance().createNbWindow(attrs.getValue("name"), bounds, Boolean.parseBoolean(attrs.getValue("dialog"))); 
             nbWindows.add(nbWindow);
         }
 
@@ -1883,7 +1881,9 @@ public class WindowManagerParser {
                             + "\" x=\"" + bounds.x 
                             + "\" y=\"" + bounds.y 
                             + "\" width=\"" + bounds.width 
-                            + "\" height=\"" + bounds.height + "\">\n").
+                            + "\" height=\"" + bounds.height 
+                            + "\" dialog=\"" + win.isDialog()
+                            + "\">\n").
                          append("    </nbwindow>\n"); // NOI18N
                 }
             }

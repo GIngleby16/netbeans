@@ -28,6 +28,8 @@ import java.awt.Rectangle;
  */
 public interface NbWindow {
     public String getName();
+    
+    public boolean isDialog();
 
     public Rectangle getBounds();
     public void setBounds(Rectangle bounds);

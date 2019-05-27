@@ -58,7 +58,8 @@ public class NbWindowImpl implements NbWindow  {
          return getCentral().isNbWindowVisible(this);
     }
     
-    public boolean isDialogRequested() {
+    @Override
+    public boolean isDialog() {
         return requestDialog;
     }    
     

@@ -1156,7 +1156,7 @@ final public class PersistenceHandler implements PersistenceObserver {
     private NbWindowConfig[] getConfigNbWindow(Set<NbWindow> windows) {
         List<NbWindowConfig> winConfigs = new ArrayList<NbWindowConfig>(windows.size());
         for(NbWindow win: windows)
-            winConfigs.add(new NbWindowConfig(win.getName(), win.getBounds()));
+            winConfigs.add(new NbWindowConfig(win.getName(), win.getBounds(), win.isDialog()));
         return winConfigs.toArray(new NbWindowConfig[windows.size()]);
     }
 }
