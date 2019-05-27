@@ -2670,6 +2670,13 @@ final class Central implements ControllerHandler {
     public void userUndockedTopComponent(TopComponent tc, ModeImpl mode) {
         Point tcLoc = tc.getLocation();
         Dimension tcSize = tc.getSize();
+
+        // if the top component is not showing, we'll compute the wrong size!
+        TopComponent selectedTC = getModeSelectedTopComponent(mode);
+        if(selectedTC != tc) {
+            tcSize = selectedTC.getSize();
+        }
+        
         SwingUtilities.convertPointToScreen(tcLoc, tc);
         Rectangle bounds = new Rectangle(tcLoc, tcSize);
         // #89100: update mode kind when undocking view in sliding mode
