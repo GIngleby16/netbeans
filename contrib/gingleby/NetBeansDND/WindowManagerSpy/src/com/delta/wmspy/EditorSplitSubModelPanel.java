@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;

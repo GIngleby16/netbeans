@@ -67,6 +67,9 @@ public interface NbWindowComponent extends RootPaneContainer  {
      */
     public void setVisible(boolean isVisible);
     
+    public void setTitle(String title);
+    public String getTitle();
+    
     /**
      * @return If this UI Component is visible
      */

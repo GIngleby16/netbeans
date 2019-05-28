@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
+import org.netbeans.core.windows.view.ui.NbWindowComponent;
 import org.openide.windows.TopComponent;
 
 
@@ -79,6 +80,10 @@ class ViewRequestor {
     // It shouldn't exist any link in directtion view -> central, but due to old API.
     public Frame getMainWindow() {
         return view.getMainWindow();
+    }
+    
+    public NbWindowComponent getNbWindowComponent(NbWindowImpl window) {
+        return view.getNbWindowComponent(window);
     }
     
     public Component getEditorAreaComponent(NbWindowImpl window) {

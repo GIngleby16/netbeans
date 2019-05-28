@@ -37,4 +37,7 @@ public interface NbWindow {
     public void setVisible(boolean visible);
     public boolean isVisible();
     
+    public void setTitle(String title);
+    public String getTitle();
+    
 }

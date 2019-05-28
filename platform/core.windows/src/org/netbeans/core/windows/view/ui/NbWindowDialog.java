@@ -211,5 +211,4 @@ public class NbWindowDialog extends JDialog implements NbWindowComponent {
     public Controller getController() {
         return controller;
     }
-
 }

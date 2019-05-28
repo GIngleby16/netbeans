@@ -82,6 +82,11 @@ class DefaultView implements View, Controller, WindowDnDManager.ViewAccessor {
         return hierarchy.getMainWindow().getFrame();
     }
     
+    @Override 
+    public NbWindowComponent getNbWindowComponent(NbWindowImpl window) {
+        return hierarchy.getNbWindowFrame(window.getName());
+    }
+    
     @Override
     public Component getEditorAreaComponent(NbWindowImpl window) {
         return hierarchy.getEditorAreaComponent(window);

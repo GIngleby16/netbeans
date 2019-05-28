@@ -25,6 +25,7 @@ import org.netbeans.core.windows.WindowSystemSnapshot;
 import java.awt.*;
 import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
+import org.netbeans.core.windows.view.ui.NbWindowComponent;
 import org.openide.windows.TopComponent;
 
 
@@ -57,7 +58,6 @@ public interface View {
     public int CHANGE_NBWINDOW_ADDED                          = 15;
     public int CHANGE_NBWINDOW_REMOVED                        = 16;
     public int CHANGE_NBWINDOW_BOUNDS_CHANGED                 = 17;
-
     
     // Mode level changes
     public int CHANGE_MODE_BOUNDS_CHANGED                = 20;
@@ -108,6 +108,8 @@ public interface View {
     public boolean isDragInProgress();
     // XXX
     public Frame getMainWindow();
+    
+    public NbWindowComponent getNbWindowComponent(NbWindowImpl window);
     
     public Component getEditorAreaComponent(NbWindowImpl window);
     

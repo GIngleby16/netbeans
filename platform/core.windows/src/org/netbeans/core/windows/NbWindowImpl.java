@@ -54,6 +54,16 @@ public class NbWindowImpl implements NbWindow  {
     }
 
     @Override
+    public void setTitle(String title) {
+        getCentral().setNbWindowTitle(this, title);
+    }
+    
+    @Override
+    public String getTitle() {
+        return getCentral().getNbWindowTitle(this);
+    }
+    
+    @Override
     public boolean isVisible() {
          return getCentral().isNbWindowVisible(this);
     }

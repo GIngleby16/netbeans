@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
@@ -53,8 +52,10 @@ import org.netbeans.core.windows.view.ControllerHandler;
 import org.netbeans.core.windows.view.View;
 import org.netbeans.core.windows.view.dnd.TopComponentDraggable;
 import org.netbeans.core.windows.view.dnd.ZOrderManager;
+import org.netbeans.core.windows.view.ui.NbWindowComponent;
 import org.openide.util.Lookup;
 import org.openide.windows.Mode;
+import org.openide.windows.NbWindow;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.openide.windows.NbWindowSelector;
@@ -1880,6 +1881,10 @@ final class Central implements ControllerHandler {
         return viewRequestor.getMainWindow(); 
     }
     
+    public NbWindowComponent getNbWindowComponent(NbWindow window){
+        return viewRequestor.getNbWindowComponent((NbWindowImpl)window);
+    }
+    
     public String guessSlideSide(TopComponent tc) {
         return viewRequestor.guessSlideSide(tc);
     }
@@ -3440,6 +3445,19 @@ final class Central implements ControllerHandler {
     public void setNbWindowVisible(NbWindowImpl window, boolean visible) {
         model.setNbWindowVisible(window, visible);
         viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, window));
+    }
+
+    public void setNbWindowTitle(NbWindowImpl window, String title) {
+        NbWindowComponent comp = viewRequestor.getNbWindowComponent(window);
+        if(comp != null)
+            comp.setTitle(title);
+    }
+    
+    public String getNbWindowTitle(NbWindowImpl window) {
+        NbWindowComponent comp = viewRequestor.getNbWindowComponent(window);
+        if(comp != null)
+            return comp.getTitle();
+        return null;
     }
     
     public void userClosedNbWindow(NbWindowImpl window) {

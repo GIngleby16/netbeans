@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.api.project.ProjectUtils;
@@ -47,6 +46,7 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
+import org.openide.windows.NbWindow;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -126,6 +126,12 @@ public class Hacks {
                         if (currTitle == null || currTitle.isEmpty() || currTitle.equals(lastKnownTitle) || /*#199245*/currTitle.equals(NO_PROJECT_TITLE)) {
                             lastKnownTitle = title;
                             mainWindow.setTitle(title);
+                            
+                            //gwi - should NbWindows have same title?
+                            Set<NbWindow> nbWindows = WindowManager.getDefault().getNbWindows();
+                            for(NbWindow window: nbWindows) {
+                                window.setTitle(title);
+                            }
                         } else {
                             LOG.log(Level.FINE, "not replacing {0} with {1} since it was last set to {2}", new Object[] {currTitle, title, lastKnownTitle});
                         }
