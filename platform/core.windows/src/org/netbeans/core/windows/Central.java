@@ -2929,7 +2929,6 @@ final class Central implements ControllerHandler {
     
     @Override
     public void userEnabledAutoHide(TopComponent tc, ModeImpl source, String targetSide) {
-        JOptionPane.showMessageDialog(null, "userEnabledAutoHide");
         ModeImpl mode = (ModeImpl)WindowManager.getDefault().findMode(tc);
         NbWindowImpl window = getWindowForMode(mode);
         
