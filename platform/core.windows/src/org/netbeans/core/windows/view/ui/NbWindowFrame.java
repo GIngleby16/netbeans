@@ -18,7 +18,6 @@
  */
 package org.netbeans.core.windows.view.ui;
 
-import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Image;
@@ -36,7 +35,7 @@ import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.view.Controller;
 import org.netbeans.core.windows.view.dnd.ZOrderManager;
 import org.openide.util.ImageUtilities;
-import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 
 /**
  * NBWindowFrame
@@ -65,7 +64,7 @@ public class NbWindowFrame extends JFrame implements NbWindowComponent {
     private NbWindowImpl window;
 
     private Component desktop;
-
+    
     public NbWindowFrame(NbWindowImpl window, Rectangle bounds, Controller controller) {
         //super(WindowManager.getDefault().getMainWindow(), window.getName());
         super(window.getName());
@@ -73,7 +72,7 @@ public class NbWindowFrame extends JFrame implements NbWindowComponent {
         setBounds(bounds);
         this.window = window;
         this.controller = controller;
-
+        
         // Automatically register with window tracker
         NbWindowTracker.getInstance().addWindow(window, this);
 
@@ -83,11 +82,7 @@ public class NbWindowFrame extends JFrame implements NbWindowComponent {
         initFrameIcons(this);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        // Not a type - we're going to use the main window title!
-        String title = NbBundle.getMessage(MainWindow.class, "CTL_MainWindow_Title_No_Project", window.getName()); //NOI18N
-        if (!title.isEmpty()) {
-            setTitle(title);
-        }
+        setTitle(WindowManager.getDefault().getMainWindow().getTitle());
 
         // To be able to activate on mouse click.
         enableEvents(java.awt.AWTEvent.MOUSE_EVENT_MASK);
@@ -119,12 +114,6 @@ public class NbWindowFrame extends JFrame implements NbWindowComponent {
     @Override
     public void setName(String name) {
         super.setName(name); //To change body of generated methods, choose Tools | Templates.
-
-        // Not a type - we're going to use the main window title!
-        String title = NbBundle.getMessage(MainWindow.class, "CTL_MainWindow_Title_No_Project", name); //NOI18N
-        if (!title.isEmpty()) {
-            setTitle(title);
-        }
     }
 
     public Component getDesktopComponent() {
