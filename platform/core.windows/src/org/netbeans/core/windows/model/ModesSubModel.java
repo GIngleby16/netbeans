@@ -101,6 +101,8 @@ final class ModesSubModel {
     public ModesSubModel(Model parentModel) {
         this.parentModel = parentModel;        
         
+        // init hashmaps
+        slidingModes2Sides.put(null, new HashMap<ModeImpl, String>(5));
         slidingSides2Modes.put(null, new HashMap<String, ModeImpl>(5));
         
         //this.editorSplitSubModel = new EditorSplitSubModel(parentModel, new SplitSubModel(parentModel));
