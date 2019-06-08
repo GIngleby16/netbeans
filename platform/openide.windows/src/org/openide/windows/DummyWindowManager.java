@@ -72,6 +72,19 @@ final class DummyWindowManager extends WindowManager {
         createWorkspace("default", null).createMode(/*CloneableEditorSupport.EDITOR_MODE*/"editor", "editor", null); // NOI18N
     }
 
+    @Override
+    public void tempHide() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void tempShow() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    
+
     public synchronized void addPropertyChangeListener(PropertyChangeListener l) {
         if (pcs == null) {
             pcs = new PropertyChangeSupport(this);

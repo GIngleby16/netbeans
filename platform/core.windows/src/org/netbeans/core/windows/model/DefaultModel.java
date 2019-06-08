@@ -743,42 +743,42 @@ final class DefaultModel implements Model {
     /** Adds closed TopComponent. */
     @Override
     public void addModeClosedTopComponent(ModeImpl mode, TopComponent tc) {
-        System.out.println("DefaultModel:addModeClosedTopComponent");
+//        System.out.println("DefaultModel:addModeClosedTopComponent");
         ModeModel modeModel = getModelForMode(mode);
         if(modeModel != null) {
             modeModel.addClosedTopComponent(tc);
         }
     }
 
-    private void checkForWindowClosure(ModeImpl mode) {
-        List<TopComponent> openTopComponents = mode.getOpenedTopComponents();
-        System.out.println("DefaultModel:checkWindowClosure,openCount=" + openTopComponents.size());
-        if(Boolean.getBoolean("netbeans.winsys.enhanced")) {
-            if(openTopComponents.size() == 0) {
-                System.out.println("Mode is empty but isEmpty=" + mode.isEmpty());
-                // does the mode belong to a topwindow?
-                NbWindow window = WindowManagerImpl.getInstance().getWindowForMode(mode);
-                if(window != null) {
-                    System.out.println("EMPTY MODE BELONGS TO WINDOW: " + window);
-
-                    // need to check for main window
-                    Set<ModeImpl> modes = getModesForWindow((NbWindowImpl)window);
-                    boolean isEmpty = true;
-                    for(ModeImpl m: modes) {
-                        if(!m.getOpenedTopComponents().isEmpty()) {
-                            isEmpty = false;
-                            break;
-                        }
-                    }
-                    if(isEmpty) {
-                        // does this really close the window?
-                        window.setVisible(false);
-                        WindowManagerImpl.getInstance().destroyNbWindow((NbWindowImpl)window);
-                    }
-                }
-            }
-        }
-    }
+//    private void checkForWindowClosure(ModeImpl mode) {
+//        List<TopComponent> openTopComponents = mode.getOpenedTopComponents();
+//        System.out.println("DefaultModel:checkWindowClosure,openCount=" + openTopComponents.size());
+//        if(Boolean.getBoolean("netbeans.winsys.enhanced")) {
+//            if(openTopComponents.size() == 0) {
+//                System.out.println("Mode is empty but isEmpty=" + mode.isEmpty());
+//                // does the mode belong to a topwindow?
+//                NbWindow window = WindowManagerImpl.getInstance().getWindowForMode(mode);
+//                if(window != null) {
+//                    System.out.println("EMPTY MODE BELONGS TO WINDOW: " + window);
+//
+//                    // need to check for main window
+//                    Set<ModeImpl> modes = getModesForWindow((NbWindowImpl)window);
+//                    boolean isEmpty = true;
+//                    for(ModeImpl m: modes) {
+//                        if(!m.getOpenedTopComponents().isEmpty()) {
+//                            isEmpty = false;
+//                            break;
+//                        }
+//                    }
+//                    if(isEmpty && !("NbMainWindow".equals(window.getName()))) {
+//                        // does this really close the window?
+//                        window.setVisible(false);
+//                        WindowManagerImpl.getInstance().destroyNbWindow((NbWindowImpl)window);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     // XXX
     @Override
@@ -809,12 +809,10 @@ final class DefaultModel implements Model {
     /** */
     @Override
     public void removeModeTopComponent(ModeImpl mode, TopComponent tc, TopComponent recentTc) {
-        System.out.println("DefaultModel:removeModeTopComponent");
+//        System.out.println("DefaultModel:removeModeTopComponent");
         ModeModel modeModel = getModelForMode(mode);
         if(modeModel != null) {
             modeModel.removeTopComponent(tc, recentTc);
-
-            checkForWindowClosure(mode);
         }
     }
 
@@ -964,7 +962,7 @@ final class DefaultModel implements Model {
     public boolean isModeEmpty(ModeImpl mode) {
         ModeModel modeModel = getModelForMode(mode);
         if(modeModel != null) {
-            System.out.println("DefaultModel:isModeEmpty modeModel=" + modeModel);
+//            System.out.println("DefaultModel:isModeEmpty modeModel=" + modeModel);
             return modeModel.isEmpty();
         } else {
             return false;

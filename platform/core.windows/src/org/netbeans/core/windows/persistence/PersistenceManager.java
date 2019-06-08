@@ -415,7 +415,7 @@ public final class PersistenceManager implements PropertyChangeListener {
     public static boolean isTopComponentPersistentWhenClosed(TopComponent tc) {
         int persistenceType = persistenceType(tc);
         if (persistenceType == TopComponent.PERSISTENCE_ALWAYS) {
-            System.out.println("PersistenceManager:isTopComponentPersistentWhenClosed, tc persistent when closed=true");
+//            System.out.println("PersistenceManager:isTopComponentPersistentWhenClosed, tc persistent when closed=true");
             return true;
         } else {
             return false;

@@ -115,6 +115,7 @@ final class DefaultModeModel implements ModeModel {
     
     @Override
     public void removeTopComponent(TopComponent tc, TopComponent recentTc) {
+//        System.out.println("DefaultModeModel.removeTopComponent");
         synchronized(LOCK_TOPCOMPONENTS) {
             topComponentSubModel.removeTopComponent(tc, recentTc);
         }

@@ -98,7 +98,7 @@ public final class MainWindow {
            if( null != theInstance ) {
                LOGGER.log(Level.INFO, "Installing MainWindow again, existing frame is: " + theInstance.frame); //NOI18N
            }
-           System.out.println("MAIN FRAME FRAME=" + frame.getClass());
+//           System.out.println("MAIN FRAME FRAME=" + frame.getClass());
            theInstance = new MainWindow(frame);
            return theInstance;
        }

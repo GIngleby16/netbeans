@@ -125,7 +125,7 @@ final class ModesSubModel {
 
     public SplitConstraint[] getModeConstraints(NbWindowImpl window, ModeImpl mode) {
         if(editorSplitSubModel.get(window) == null) {            
-            System.out.println("WARNING USING A SPLIT MODEL FOR A WINDOW THAT HAS BEED DESTROYED!");
+//            System.out.println("WARNING USING A SPLIT MODEL FOR A WINDOW THAT HAS BEED DESTROYED!");
             return new SplitConstraint[0];
         }
         if (mode.getKind() == Constants.MODE_KIND_EDITOR) {

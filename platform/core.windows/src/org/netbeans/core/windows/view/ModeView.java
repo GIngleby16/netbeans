@@ -103,7 +103,7 @@ public class ModeView extends ViewElement {
 //    }
     
     public void removeTopComponent(TopComponent tc) {
-        System.out.println("ModeView:removeTopComponent");
+//        System.out.println("ModeView:removeTopComponent");
         if(!getTopComponents().contains(tc)) {
             return;
         }

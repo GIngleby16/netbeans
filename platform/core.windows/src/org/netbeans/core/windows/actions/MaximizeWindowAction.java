@@ -103,14 +103,14 @@ public final class MaximizeWindowAction extends AbstractAction implements Presen
         WindowManagerImpl wm = WindowManagerImpl.getInstance();
         TopComponent curTC = getTCToWorkWith();
         
-        System.out.println("CurrentTopComponent: " + curTC);
+//        System.out.println("CurrentTopComponent: " + curTC);
         
         if(wm.isDocked(curTC)) {
             // inside main window
             ModeImpl mode = (ModeImpl)wm.findMode(curTC);
             String tcID = wm.findTopComponentID( curTC );
             NbWindowImpl window = wm.getWindowForMode(mode);
-            System.out.println("tcID=" + tcID + ", window=" + window + ", mode=" + mode);
+//            System.out.println("tcID=" + tcID + ", window=" + window + ", mode=" + mode);
             
             if( mode.getKind() == Constants.MODE_KIND_SLIDING ) {
                 //maximize/restore slided-in window

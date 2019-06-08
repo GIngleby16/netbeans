@@ -249,7 +249,7 @@ public final class ModeImpl implements Mode {
     
     /** Closes given top component. */
     public void close(TopComponent tc) {
-        System.out.println("ModeImpl:close, Mode asked to close topcomponent");
+//        System.out.println("ModeImpl:close, Mode asked to close topcomponent");
         if(!getOpenedTopComponents().contains(tc)) {
             return;
         }
@@ -259,7 +259,7 @@ public final class ModeImpl implements Mode {
             if (Boolean.TRUE.equals(tc.getClientProperty(Constants.KEEP_NON_PERSISTENT_TC_IN_MODEL_WHEN_CLOSED))) {
                 addClosedTopComponent(tc);
             } else {
-                System.out.println("ModeImpl.close");
+//                System.out.println("ModeImpl.close");
                 removeTopComponent(tc);
             }
         }
@@ -452,7 +452,7 @@ public final class ModeImpl implements Mode {
     
     /** Removes TopComponent from this mode. */
     public void removeTopComponent(TopComponent tc) {
-        System.out.println("ModeImpl:removeTopComponent " + tc);
+//        System.out.println("ModeImpl:removeTopComponent " + tc);
         getCentral().removeModeTopComponent(this, tc);
         
     }        

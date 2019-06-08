@@ -570,7 +570,7 @@ final class Central implements ControllerHandler {
             return;
         }
         
-        System.out.println("Model:removeMode " + mode.getName());
+//        System.out.println("Model:removeMode " + mode.getName());
         
 //        debugLog("removeMode()=" + mode.getDisplayName());
         model.removeMode(mode, false);
@@ -893,10 +893,12 @@ final class Central implements ControllerHandler {
         if(opened) {
             WindowManagerImpl.getInstance().notifyTopComponentClosed(tc);
         }
-        System.out.println("Central:addModeClosedTopComponent, at bottom is the mode empty=" + mode.isEmpty());
-        System.out.println("Mode=" + mode.getName());
-        System.out.println("Mode.openTopComponents=" + mode.getOpenedTopComponentsIDs().size());
-        System.out.println("Mode.closedTopComponents=" + mode.getClosedTopComponentsIDs().size());
+//        System.out.println("Central:addModeClosedTopComponent, at bottom is the mode empty=" + mode.isEmpty());
+//        System.out.println("Mode=" + mode.getName());
+//        System.out.println("Mode.openTopComponents=" + mode.getOpenedTopComponentsIDs().size());
+//        System.out.println("Mode.closedTopComponents=" + mode.getClosedTopComponentsIDs().size());
+        
+        
         return true;
     }
 
@@ -965,22 +967,30 @@ final class Central implements ControllerHandler {
                 }
             }
         }
+
+        //destroyNbWindowIfEmpty(window);
         
+        return tcRemoved;
+    }
+    
+    public boolean destroyNbWindowIfEmpty(NbWindowImpl window) {
         if(window != null) {
             // check to see if empty!
             boolean isEmpty = true;
             Set<ModeImpl> checkModes = model.getModesForWindow(window);
             for(ModeImpl m: checkModes) {
-                if(!m.isEmpty()) {
+                List<TopComponent> open = m.getOpenedTopComponents();
+                if(!m.getOpenedTopComponents().isEmpty()) {
                     isEmpty = false;
                     break;
                 }
             }
-            if(isEmpty)
+            if(isEmpty) {
                 destroyNbWindow(window);
+                return true;
+            }
         }
-        
-        return tcRemoved;
+        return false;
     }
     
     /** Removed top component from model and requests view (if needed). */
@@ -989,7 +999,7 @@ final class Central implements ControllerHandler {
             return false;
         }
         
-        System.out.println("Central:removeModeTopComponent " + tc);
+//        System.out.println("Central:removeModeTopComponent " + tc);
         
         boolean viewChange = getModeOpenedTopComponents(mode).contains(tc);
         
@@ -1023,7 +1033,7 @@ final class Central implements ControllerHandler {
         // Remove mode from model if is not permanennt and emptied.
         boolean modeRemoved = false;
         if(!mode.isPermanent() && model.getModeTopComponents(mode).isEmpty()) {
-            System.out.println("IF THIS MODE IS EMPTY - REMOVE IT FROM THE MODEL - THIS leads to window closure?");
+//            System.out.println("IF THIS MODE IS EMPTY - REMOVE IT FROM THE MODEL - THIS leads to window closure?");
             // remove only if there's no other component in sliding modes that has this one as the previous mode.
             //TODO
             if (doCheckSlidingModes(mode)) {
@@ -1055,7 +1065,7 @@ final class Central implements ControllerHandler {
             WindowManagerImpl.getInstance().doFirePropertyChange(
                 WindowManager.PROP_MODES, null, null);
         }
-            
+                    
         if(newActive != null) {
             // Notify registry.
             WindowManagerImpl.notifyRegistryTopComponentActivated(
@@ -2060,7 +2070,7 @@ final class Central implements ControllerHandler {
 
     @Override
     public void userClosedTopComponent(ModeImpl mode, TopComponent tc) {
-        NbWindowImpl window = getWindowForMode(mode);
+        final NbWindowImpl window = getWindowForMode(mode);
         if( mode == getCurrentMaximizedMode(window) && isViewMaximized(window) ) {
             switchMaximizedMode(window, null );
             for(Iterator it = getModes().iterator(); it.hasNext(); ) {
@@ -2112,6 +2122,9 @@ final class Central implements ControllerHandler {
         if ((recentTc != null) && wasTcClosed) {
             recentTc.requestActive();
         }
+        
+        destroyNbWindowIfEmpty(window);
+        
         //#177986 - repaint the main window when closing the last tc
         if( TopComponent.getRegistry().getOpened().isEmpty() ) {
             SwingUtilities.invokeLater( new Runnable() {
@@ -2178,42 +2191,55 @@ final class Central implements ControllerHandler {
     // DnD
     @Override
     public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable) {
+//        System.out.println("USER DROPPED A");
+        NbWindowImpl dragWindow = null;
         boolean unmaximize = false;
         if( draggable.isTopComponentTransfer() ) {
+            dragWindow = getWindowForTopComponent(draggable.getTopComponent());
             unmaximize = moveTopComponentIntoMode( mode, draggable.getTopComponent() );
             System.out.print("User Dropped Top Componentns into mode " + mode);
         } else {
+            dragWindow = getWindowForMode(draggable.getMode());
             TopComponent selTC = draggable.getMode().getSelectedTopComponent();
             mergeModes( draggable.getMode(), mode, -1 );
             if( null != selTC )
                 mode.setSelectedTopComponent( selTC );
         }
         //NbWindowImpl window = getWindowForMode(mode);
-        updateViewAfterDnD(null, unmaximize);
-        updateViewAfterDnD(window, unmaximize);
+        updateViewAfterDnD(null, unmaximize, dragWindow);
+        updateViewAfterDnD(window, unmaximize, dragWindow);        
     }
     
     @Override
     public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable, int index) {
+//        System.out.println("USER DROPPED B");
+        NbWindowImpl dragWindow = null;        
         boolean unmaximize = false;
         if( draggable.isTopComponentTransfer() ) {
+            dragWindow = getWindowForTopComponent(draggable.getTopComponent());            
             unmaximize = moveTopComponentIntoMode( mode, draggable.getTopComponent(), index );
         } else {
+            dragWindow = getWindowForMode(draggable.getMode());
             TopComponent selTC = draggable.getMode().getSelectedTopComponent();
             mergeModes( draggable.getMode(), mode, index );
             if( null != selTC )
                 mode.setSelectedTopComponent( selTC );
         }
         //NbWindowImpl window = getWindowForMode(mode);
-        updateViewAfterDnD(window, unmaximize);
+        updateViewAfterDnD(window, unmaximize, dragWindow);
     }
+
     
     @Override
     public void userDroppedTopComponents(NbWindowImpl window, ModeImpl mode, TopComponentDraggable draggable, String side) {
+//        System.out.println("USER DROPPED C");
+        NbWindowImpl dragWindow = null;                
         ModeImpl newMode = attachModeToSide(window, mode, side, mode.getKind() );
         if( draggable.isTopComponentTransfer() ) {
+            dragWindow = getWindowForTopComponent(draggable.getTopComponent());            
             moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
         } else {
+            dragWindow = getWindowForMode(draggable.getMode());
             if( newMode.getKind() != draggable.getKind() ) {
                 mergeModes( draggable.getMode(), newMode, -1 );
             } else {
@@ -2221,11 +2247,13 @@ final class Central implements ControllerHandler {
             }
         }
         
-        updateViewAfterDnD(window, true);
+        updateViewAfterDnD(window, true, dragWindow);
     }
     
     @Override
     public void userDroppedTopComponentsIntoEmptyEditor(NbWindowImpl window, TopComponentDraggable draggable) {
+//        System.out.println("USER DROPPED D");
+        NbWindowImpl dragWindow = null;                
         // PENDING
         String editorModeName = "editor";
         if(window instanceof NbWindowImpl)
@@ -2248,47 +2276,60 @@ final class Central implements ControllerHandler {
             return;
         }
         if( draggable.isTopComponentTransfer() ) {
+            dragWindow = getWindowForTopComponent(draggable.getTopComponent());            
             moveTopComponentIntoMode(mode, draggable.getTopComponent());
         } else {
+            dragWindow = getWindowForMode(draggable.getMode());
             if( mode.getKind() != draggable.getKind() ) {
                 mergeModes( draggable.getMode(), mode, 0 );
             } else {
                 dockMode( mode, draggable.getMode() );
             }
         }
-        updateViewAfterDnD(window, true);
+        updateViewAfterDnD(window, true, dragWindow);
     }
     
     @Override
     public void userDroppedTopComponentsAround(NbWindowImpl window, TopComponentDraggable draggable, String side) {
+//        System.out.println("USER DROPPED E");
+        NbWindowImpl dragWindow = null;                
         ModeImpl newMode = attachModeAroundDesktop(window, side );
         if( draggable.isTopComponentTransfer() ) {
+            dragWindow = getWindowForTopComponent(draggable.getTopComponent());            
             moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
         } else {
+            dragWindow = getWindowForMode(draggable.getMode());            
             dockMode( newMode, draggable.getMode() );
         }
 
         //NbWindowImpl window = getWindowForMode(newMode);
-        updateViewAfterDnD(window, true);
+        updateViewAfterDnD(window, true, dragWindow);
     }
     
     @Override
     public void userDroppedTopComponentsAroundEditor(NbWindowImpl window, TopComponentDraggable draggable, String side) {
+//        System.out.println("USER DROPPED F");
+        NbWindowImpl dragWindow = null;                
         ModeImpl newMode = attachModeAroundEditor(window, side, draggable.getKind() );
         if( draggable.isTopComponentTransfer() ) {
+            dragWindow = getWindowForTopComponent(draggable.getTopComponent());            
             moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
         } else {
+            dragWindow = getWindowForMode(draggable.getMode());            
             dockMode( newMode, draggable.getMode() );
         }
-        updateViewAfterDnD(window, true);
+        updateViewAfterDnD(window, true, dragWindow);
     }
     
     @Override
     public void userDroppedTopComponentsIntoFreeArea(TopComponentDraggable draggable, Rectangle bounds) {
+//        System.out.println("USER DROPPED G");
+        NbWindowImpl dragWindow = null;                
         NbWindowImpl window = null;
         if( draggable.isTopComponentTransfer() ) {
             if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
                 TopComponent tc = draggable.getTopComponent();
+                dragWindow = getWindowForTopComponent(tc);            
                 
                 Collection<? extends NbWindowSelector> selectors = Lookup.getDefault().lookupAll(NbWindowSelector.class);
                 Boolean isDialogRequested = null;
@@ -2301,24 +2342,6 @@ final class Central implements ControllerHandler {
                                 
                 String nbWindowName = getUnusedNbWindowName();
                 window = (NbWindowImpl)WindowManagerImpl.getInstance().createNbWindow(nbWindowName, bounds, Boolean.TRUE.equals(isDialogRequested)); 
-
-            // a  nbwindow name can be changed via setName - ? Should that be allowed ? Should we also have a UID?
-//            ModeImpl newMode = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_editor", Constants.MODE_KIND_EDITOR, Constants.MODE_STATE_JOINED, true);  
-//            model.addMode(window, newMode, new SplitConstraint[0]);
-//
-//            ModeImpl newMode2 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_bottomSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
-//            model.addSlidingMode(window, newMode2, "bottom", null);
-//
-//            ModeImpl newMode3 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_rightSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
-//            model.addSlidingMode(window, newMode3, "right", null);
-//
-//            ModeImpl newMode4 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_leftSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);  
-//            model.addSlidingMode(window, newMode4, "left", null);
-//
-//            ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(nbWindowName + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true); 
-//            model.addSlidingMode(window, newMode5, "top", null);
-                
-                
                
                 // move top component into mode
                 ModeImpl nbWindowMode = null;
@@ -2332,15 +2355,17 @@ final class Central implements ControllerHandler {
                 moveTopComponentIntoMode(nbWindowMode, draggable.getTopComponent());
                 nbWindowMode.setSelectedTopComponent(draggable.getTopComponent());
             } else {
+                dragWindow = getWindowForTopComponent(draggable.getTopComponent());            
                 ModeImpl newMode = createFloatingMode( bounds, draggable.getKind() );
                 moveTopComponentIntoMode( newMode, draggable.getTopComponent() );
                 newMode.setSelectedTopComponent( draggable.getTopComponent() );
                 window = null;
             }
         } else {
+            dragWindow = getWindowForMode(draggable.getMode());            
             userUndockedMode( draggable.getMode(), bounds );
         }
-        updateViewAfterDnD(window, false);
+        updateViewAfterDnD(window, false, dragWindow);
     }
 
     /**
@@ -2349,6 +2374,8 @@ final class Central implements ControllerHandler {
      * @since 2.30
      */
     public void userUndockedMode( ModeImpl mode ) {
+//        System.out.println("USER UNDOCKED MODE A");
+        NbWindowImpl dragWindow = null;                
         NbWindowImpl window = getWindowForMode(mode);
         if (getCurrentMaximizedMode(window) == mode) {
             switchMaximizedMode(window, null);
@@ -2366,6 +2393,8 @@ final class Central implements ControllerHandler {
     }
 
     private void userUndockedMode( ModeImpl mode, Rectangle modeBounds ) {
+//        System.out.println("USER UNDOCKED MODE B");
+        
         int modeKind = mode.getKind();
         if (modeKind == Constants.MODE_KIND_SLIDING) {
             modeKind = Constants.MODE_KIND_VIEW;
@@ -2420,7 +2449,7 @@ final class Central implements ControllerHandler {
             }
             model.setModeConstraints(window, mode, new SplitConstraint[0] );
         }
-        updateViewAfterDnD(window, false);
+        updateViewAfterDnD(window, false, window);
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -2431,11 +2460,15 @@ final class Central implements ControllerHandler {
      * @since 2.30
      */
     public void userDockedMode( ModeImpl mode ) {
+//        System.out.println("USER DOCKED MODE A");
+        NbWindowImpl dragWindow = null;
+
         int modeKind = mode.getKind();
         if (modeKind == Constants.MODE_KIND_SLIDING) {
             modeKind = Constants.MODE_KIND_VIEW;
         }
         NbWindowImpl window = getWindowForMode(mode);
+        dragWindow = window;
         switchMaximizedMode(window, null);
 
         TopComponent selectedTC = mode.getSelectedTopComponent();
@@ -2450,6 +2483,7 @@ final class Central implements ControllerHandler {
             if( !ids.isEmpty() ) {
                 String tcID = ids.get( 0 );
                 ModeImpl previousMode = model.getModeTopComponentPreviousMode( mode, tcID );
+                dragWindow = getWindowForMode(previousMode);
                 if( null == previousMode || !model.getModes().contains(previousMode) ) {
                     SplitConstraint[] constraints = model.getModeTopComponentPreviousConstraints( mode, tcID );
                     if( null != constraints ) {
@@ -2485,7 +2519,7 @@ final class Central implements ControllerHandler {
                 model.setModeState( mode, Constants.MODE_STATE_JOINED );
             }
         }
-        updateViewAfterDnD(window, false);
+        updateViewAfterDnD(window, false, dragWindow);
         if( null != selectedTC )
             selectedTC.requestActive();
         WindowManagerImpl.getInstance().doFirePropertyChange(
@@ -2500,6 +2534,7 @@ final class Central implements ControllerHandler {
      * @since 2.30
      */
     private void mergeModes( ModeImpl source, ModeImpl target, int index ) {
+//        System.out.println("MergeModes");
         ModeImpl prevMode = null;
         SplitConstraint[] prevConstraints = null;
         if( source.isPermanent() && !target.isPermanent() ) {
@@ -2600,6 +2635,8 @@ final class Central implements ControllerHandler {
     }
     
     private void dockMode( ModeImpl prevMode, ModeImpl floatingMode ) {
+//        System.out.println("Dock mode");
+        
         ModeImpl floatingPrevMode = getPreviousMode( floatingMode );
         List<TopComponent> opened = prevMode.getOpenedTopComponents();
         for( TopComponent tc : opened ) {
@@ -2673,6 +2710,8 @@ final class Central implements ControllerHandler {
 
     @Override
     public void userUndockedTopComponent(TopComponent tc, ModeImpl mode) {
+//        System.out.println("userUndockedTopComponent");
+        NbWindowImpl dragWindow = getWindowForTopComponent(tc);
         Point tcLoc = tc.getLocation();
         Dimension tcSize = tc.getSize();
 
@@ -2728,17 +2767,20 @@ final class Central implements ControllerHandler {
             ModeImpl newMode = createFloatingMode( bounds, modeKind );
             moveTopComponentIntoMode( newMode, tc );
         }
-        updateViewAfterDnD(window, false);
+        updateViewAfterDnD(window, false, dragWindow);
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
 
     @Override
     public void userDockedTopComponent(TopComponent tc, ModeImpl mode) {
+//        System.out.println("userDockedTopComponent");
+        NbWindowImpl dragWindow = null;
         ModeImpl dockTo = null;
         // find saved previous mode or at least constraints (=the place) to dock back into
         String tcID = WindowManagerImpl.getInstance().findTopComponentID(tc);
         ModeImpl source = (ModeImpl) WindowManagerImpl.getInstance().findMode(tc);
+        dragWindow = getWindowForMode(source);
         dockTo = model.getModeTopComponentPreviousMode(source, tcID);
         int dockIndex = model.getModeTopComponentPreviousIndex(source, tcID);
         int modeKind = mode.getKind();
@@ -2766,7 +2808,7 @@ final class Central implements ControllerHandler {
         }
         moveTopComponentIntoMode(dockTo, tc, dockIndex);
         NbWindowImpl window = getWindowForMode(dockTo);
-        updateViewAfterDnD(window, false);
+        updateViewAfterDnD(window, false, dragWindow);
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -2811,11 +2853,15 @@ final class Central implements ControllerHandler {
         boolean intoSliding = mode.getKind() == Constants.MODE_KIND_SLIDING;
         boolean intoSeparate = mode.getState() == Constants.MODE_STATE_SEPARATED;
         ModeImpl prevMode = null;
+        NbWindowImpl prevWindow = null;
         String tcID = WindowManagerImpl.getInstance().findTopComponentID(tc);
         // XXX
         if(!mode.canContain(tc)) {
             return false;
         }
+        ModeImpl myCurrentMode = findMode(tcID);
+        NbWindowImpl myCurrentWindow = getWindowForMode(myCurrentMode);
+        
         TopComponentTracker.getDefault().add( tc, mode );
         for(Iterator it = model.getModes().iterator(); it.hasNext(); ) {
             ModeImpl m = (ModeImpl)it.next();
@@ -2853,9 +2899,9 @@ final class Central implements ControllerHandler {
                 }
             }
             // remember previous mode and constraints for precise de-auto-hide
-            NbWindowImpl window = getWindowForMode(prevMode);
+            prevWindow = getWindowForMode(prevMode);
             model.setModeTopComponentPreviousMode(mode, tcID, prevMode, prevIndex);
-            model.setModeTopComponentPreviousConstraints(mode, tcID, model.getModeConstraints(window, prevMode));
+            model.setModeTopComponentPreviousConstraints(mode, tcID, model.getModeConstraints(prevWindow, prevMode));
         }
         
         NbWindowImpl window = getWindowForMode(mode);
@@ -2879,6 +2925,7 @@ final class Central implements ControllerHandler {
                 mode.setBounds(tc.getBounds());
             }            
         }
+        
         //#232061 
         if( null != tc.getClientProperty("windnd_cloned_tc")) {
             tc.putClientProperty("windnd_cloned_tc", null);
@@ -2894,9 +2941,13 @@ final class Central implements ControllerHandler {
         List<String> opened = slidingMode.getOpenedTopComponentsIDs();
     }
     
-    private void updateViewAfterDnD(NbWindowImpl window, boolean unmaximize) {
+    private void updateViewAfterDnD(NbWindowImpl dropWindow, boolean unmaximize, NbWindowImpl dragWindow) {
+//        System.out.println("updateViewAfterDND");
+        
+        destroyNbWindowIfEmpty(dragWindow);
+        
         if( unmaximize ) {
-            switchMaximizedMode(window, null);
+            switchMaximizedMode(dropWindow, null);
         }
         
         if(isVisible()) {
@@ -3313,7 +3364,7 @@ final class Central implements ControllerHandler {
         ModeImpl newMode = attachModeToSide(null, currentMode, null, currentMode.getKind() );
         moveTopComponentIntoMode( newMode, tc );
         NbWindowImpl window = getWindowForMode(newMode);
-        updateViewAfterDnD(window, true );
+        updateViewAfterDnD(window, true , window);
         tc.requestActive();
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
@@ -3325,6 +3376,7 @@ final class Central implements ControllerHandler {
      */
     void collapseTabGroup( ModeImpl mode ) {
         ModeImpl neighbor = findClosestNeighbor( mode );
+        NbWindowImpl dragWindow  = getWindowForMode(neighbor);
         if( null == neighbor )
             return;
         TopComponent selTC = mode.getSelectedTopComponent();
@@ -3332,7 +3384,7 @@ final class Central implements ControllerHandler {
         if( null != selTC )
             selTC.requestActive();
         NbWindowImpl window  = getWindowForMode(mode);
-        updateViewAfterDnD(window, true );
+        updateViewAfterDnD(window, true , dragWindow);
         WindowManagerImpl.getInstance().doFirePropertyChange(
             WindowManager.PROP_MODES, null, null);
     }
@@ -3402,6 +3454,7 @@ final class Central implements ControllerHandler {
     // NEW --------------------------------------------------------------------
     
     public void createNbWindowModel(NbWindowImpl window, String name, Rectangle bounds) {
+//        System.out.println("createNbWindowModel");
         model.createNbWindowModel(window, name, bounds);
         
 //        if(defaultModes) {        
@@ -3477,6 +3530,7 @@ final class Central implements ControllerHandler {
             model.removeMode(mode, true);
             userClosedMode(mode);
         }
+//        System.out.println("destroyNbWindow+model.removeNbWindow+CHANGE_NBWINDOW_REMOVED");
         model.removeNbWindow(window);        
         viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_REMOVED, window, window));
     }
@@ -3514,6 +3568,12 @@ final class Central implements ControllerHandler {
     }
     
     public NbWindowImpl getWindowForMode(ModeImpl mode) {
+        return model.getWindowForMode(mode);
+    }
+
+    public NbWindowImpl getWindowForTopComponent(TopComponent tc) {
+        WindowManagerImpl wm = WindowManagerImpl.getInstance();
+        ModeImpl mode = (ModeImpl)wm.findMode(tc);
         return model.getWindowForMode(mode);
     }
 }

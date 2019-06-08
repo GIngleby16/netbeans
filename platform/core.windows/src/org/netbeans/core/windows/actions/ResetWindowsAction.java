@@ -30,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import org.netbeans.core.WindowSystem;
 import org.netbeans.core.windows.ModeImpl;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.PersistenceHandler;
 import org.netbeans.core.windows.RegistryImpl;
 import org.netbeans.core.windows.TopComponentGroupImpl;
@@ -43,7 +44,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Lookup;
-import org.openide.windows.Mode;
+import org.openide.windows.NbWindow;
 import org.openide.windows.RetainLocation;
 import org.openide.windows.TopComponent;
 import org.openide.windows.TopComponentGroup;
@@ -87,6 +88,11 @@ public class ResetWindowsAction implements ActionListener {
         MainWindow.getInstance().setFullScreenMode(false);
         
         wm.getMainWindow().setExtendedState( JFrame.NORMAL );
+        
+        // close all NbWindows
+        for(NbWindow win: WindowManagerImpl.getInstance().getNbWindows()) {
+            WindowManagerImpl.getInstance().destroyNbWindow((NbWindowImpl)win);
+        }
 
         TopComponentGroupImpl projectTCGroup = (TopComponentGroupImpl) wm.findTopComponentGroup("OpenedProjects"); //NOI18N
         final boolean isProjectsTCGroupOpened = null != projectTCGroup && projectTCGroup.isOpened();

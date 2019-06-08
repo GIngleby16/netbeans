@@ -92,7 +92,10 @@ public abstract class WindowManager extends Object implements Serializable {
 
         return dummyInstance;
     }
-
+    
+    public abstract void tempHide();
+    public abstract void tempShow();
+    
     // NEW -------------------------------------------------------------------
 
     public abstract Set<NbWindow> getNbWindows(); 

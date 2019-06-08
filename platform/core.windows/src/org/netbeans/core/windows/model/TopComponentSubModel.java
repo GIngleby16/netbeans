@@ -183,7 +183,7 @@ final class TopComponentSubModel {
     
     public boolean addClosedTopComponent(TopComponent tc) {
         int index = openedTopComponents.indexOf(tc);
-        System.out.println("TopComponentSubModel:addClosedTopComponent: " + tc);
+//        System.out.println("TopComponentSubModel:addClosedTopComponent: " + tc);
         String tcID = getID(tc);
         if (!tcIDs.contains(tcID)) {
             tcIDs.add(tcID);
@@ -194,15 +194,7 @@ final class TopComponentSubModel {
                 adjustSelectedTopComponent(index, null);
             }
         } 
-        
-        
-        if(openedTopComponents.size() == 0){
-            System.out.println(" THIS MODE HAS NO MORE TOP COMPONENTS");      
-            if(kind == Constants.MODE_KIND_EDITOR) {
-                System.out.println("THIS EDITOR MODE IS EMPTY - DOES THE WINDOW HAVE ANY TOP COMPONENTS?");
-            }
-        }
-        
+                      
         // XXX - should be deleted after TopComponent.isSliding is introduced
         if (kind == Constants.MODE_KIND_SLIDING) {
             setSlidingProperty(tc);
@@ -231,6 +223,7 @@ final class TopComponentSubModel {
      * If null then the TopComponent nearest to the removed one will be selected.
      */
     public boolean removeTopComponent(TopComponent tc, TopComponent recentTc) {
+//        System.out.println("TopComponentSubModel.removeTopComponent");
         boolean res;
         String tcID = getID(tc);
         if(openedTopComponents.contains(tc)) {
@@ -266,7 +259,7 @@ final class TopComponentSubModel {
     }
     
     public boolean isEmpty() {
-        System.out.println("TopComponentSubModel.isEmpty = " + tcIDs.isEmpty());
+//        System.out.println("TopComponentSubModel.isEmpty = " + tcIDs.isEmpty());
         return tcIDs.isEmpty();
     }
     
@@ -347,7 +340,7 @@ final class TopComponentSubModel {
     
     // XXX
     public void removeClosedTopComponentID(String tcID) {
-        System.out.println("TopComponentSubModel:removeClosedTopComponent: " + tcID);
+//        System.out.println("TopComponentSubModel:removeClosedTopComponent: " + tcID);
         tcIDs.remove(tcID);
     }
     

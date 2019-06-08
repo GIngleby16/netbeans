@@ -114,6 +114,20 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         }
         busyIconWarmUp();
     }
+
+    @Override
+    public void tempHide() {
+        final WindowSystemImpl ws = Lookup.getDefault().lookup( WindowSystemImpl.class );
+        ws.hide();
+    }
+
+    @Override
+    public void tempShow() {
+        final WindowSystemImpl ws = Lookup.getDefault().lookup( WindowSystemImpl.class );
+        ws.show();
+    }
+    
+    
     
     /** Singleton accessor, returns instance of window manager implementation */
     public static WindowManagerImpl getInstance() {
@@ -1143,13 +1157,16 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     public void notifyTopComponentClosed(TopComponent tc) {
-        System.out.println("WindowManagerImpl:notifyTopComponentClosed: " + tc);
+//        System.out.println("WindowManagerImpl:notifyTopComponentClosed: " + tc);
         // Inform component instance.
         componentCloseNotify(tc);
         // let others know that top component was closed...
         notifyRegistryTopComponentClosed(tc);
+
+        NbWindowImpl window = getCentral().getWindowForTopComponent(tc);
+        getCentral().destroyNbWindowIfEmpty(window);
     }
-    
+
     public void notifyTopComponentFocused(TopComponent tc) {
         // added by gwi - support for multiple windows
         notifyRegistryTopComponentFocused(tc);
@@ -1181,7 +1198,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
     
     private static void notifyRegistryTopComponentClosed(TopComponent tc) {
-        System.out.println("WindowManager:notifyRegistryTopComponentClosed: "+ tc);
+//        System.out.println("WindowManager:notifyRegistryTopComponentClosed: "+ tc);
         ((RegistryImpl)getDefault().getRegistry()).topComponentClosed(tc);
     }
 
@@ -1308,7 +1325,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     
     @Override
     protected void topComponentClose(TopComponent tc) {
-        System.out.println("WindowManager:topComponentClose: " + tc);
+//        System.out.println("WindowManager:topComponentClose: " + tc);
         warnIfNotInEDT();
         
         boolean opened = topComponentIsOpened(tc);
@@ -2167,7 +2184,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     public void destroyNbWindow(NbWindowImpl window) {
         getCentral().destroyNbWindow(window);
     }
-    
+        
     private NbWindow createNbWindowImpl(String name, Rectangle bounds, boolean requestDialog) {
         return new NbWindowImpl(name, bounds, requestDialog);
     }

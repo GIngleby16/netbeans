@@ -260,7 +260,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
         
         public ModeDialog (Frame owner, AbstractModeContainer abstractModeContainer, ModeView view) {
             super(owner);
-            System.out.println("ModeDialog");
+//            System.out.println("ModeDialog");
             // To be able to activate on mouse click.
             enableEvents(java.awt.AWTEvent.MOUSE_EVENT_MASK);
             modeBase = new SharedModeUIBaseImpl(abstractModeContainer, view, this);
@@ -385,7 +385,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
 
         @Override
         public void setVisible(boolean b) {
-            System.out.println("ModeDialog:setVisible " + b);
+//            System.out.println("ModeDialog:setVisible " + b);
             super.setVisible(b); //To change body of generated methods, choose Tools | Templates.
         }
     } // end of ModeDialog
@@ -454,7 +454,7 @@ public final class DefaultSeparateContainer extends AbstractModeContainer {
 
                 @Override
                 public void windowClosed (WindowEvent evt) {
-                    System.out.println("DefaultSeparateContainer:windowClosed");
+//                    System.out.println("DefaultSeparateContainer:windowClosed");
                     ZOrderManager.getInstance().detachWindow((RootPaneContainer)window);
                 }
 

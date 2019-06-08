@@ -57,6 +57,18 @@ public class OnShowingTest extends NbTestCase {
             }
 
             @Override
+            public void tempHide() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void tempShow() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+            
+            
+
+            @Override
             public Mode findMode(String name) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
