@@ -30,6 +30,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.ModeImpl;
+import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.openide.windows.WindowManager;
 
@@ -114,10 +115,14 @@ implements PropertyChangeListener {
             setEnabled(false);
             return;
         }
+        NbWindowImpl contextWindow = WindowManagerImpl.getInstance().getWindowForMode(contextMode);
         boolean enable = contextMode.getState() == Constants.MODE_STATE_JOINED;
         enable &= contextMode.getKind() == Constants.MODE_KIND_EDITOR;
         boolean hasOtherEditorMode = false;
         for( ModeImpl m : WindowManagerImpl.getInstance().getModes() ) {
+            NbWindowImpl mWindow = WindowManagerImpl.getInstance().getWindowForMode(m);
+            if(mWindow != contextWindow)
+                continue;
             if( m.getKind() == Constants.MODE_KIND_EDITOR && m.getState() == Constants.MODE_STATE_JOINED && m != contextMode ) {
                 hasOtherEditorMode = true;
                 break;

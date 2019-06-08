@@ -3396,6 +3396,7 @@ final class Central implements ControllerHandler {
      * @return Closest neighbor to the given mode or null.
      */
     private ModeImpl findClosestNeighbor( ModeImpl mode ) {
+        NbWindowImpl contextWindow = WindowManagerImpl.getInstance().getWindowForMode(mode);
         ArrayList<ModeImpl> modes = new ArrayList<ModeImpl>( model.getModes().size() );
         ModeImpl inSplitLeftNeighbor = null;
         ModeImpl inSplitRightNeighbor = null;
@@ -3403,6 +3404,9 @@ final class Central implements ControllerHandler {
         int index = sc[sc.length-1].index;
         for( ModeImpl m : model.getModes() ) {
             if( mode == m || m.getKind() != mode.getKind() || m.getState() != mode.getState() )
+                continue;
+            NbWindowImpl mWindow = WindowManagerImpl.getInstance().getWindowForMode(m);
+            if(mWindow != contextWindow)
                 continue;
             SplitConstraint[] otherSc = m.getConstraints();
             if( sameSplit( sc, otherSc) ) {
