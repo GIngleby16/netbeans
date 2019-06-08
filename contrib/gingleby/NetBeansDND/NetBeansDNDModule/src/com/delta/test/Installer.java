@@ -46,15 +46,15 @@ public class Installer extends ModuleInstall {
 //                
 //                // Open some real editors
 //                
-//                try {
-//                    File f = new File("U://LICENSE.txt");
-//                    FileObject fo = FileUtil.toFileObject(f);
-//                    DataObject d = DataObject.find(fo);
-//                    EditorCookie ec = (EditorCookie)d.getCookie(EditorCookie.class);
-//                    ec.open();
-//                } catch(Throwable t) {
-//                    t.printStackTrace();
-//                }
+                try {
+                    File f = new File("U://LICENSE.txt");
+                    FileObject fo = FileUtil.toFileObject(f);
+                    DataObject d = DataObject.find(fo);
+                    EditorCookie ec = (EditorCookie)d.getCookie(EditorCookie.class);
+                    ec.open();
+                } catch(Throwable t) {
+                    t.printStackTrace();
+                }
 //
 //                try {
 //                    File f = new File("U:/DepartureTableRenderer.java");

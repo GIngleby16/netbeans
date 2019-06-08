@@ -18,14 +18,17 @@
  */
 package org.netbeans.core.windows;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import org.openide.util.Lookup;
 import org.openide.util.NbPreferences;
 import org.openide.util.WeakSet;
+import org.openide.windows.EditorSelector;
 import org.openide.windows.TopComponent;
 
 /**
@@ -144,7 +147,17 @@ public final class TopComponentTracker {
      * @return True if the given TopComponent is not a 'view'.
      */
     public boolean isEditorTopComponent( TopComponent tc ) {
-        return !isViewTopComponent( tc );
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            Collection<? extends EditorSelector> selectors = Lookup.getDefault().lookupAll(EditorSelector.class);
+            for (EditorSelector s : selectors) {
+                if(s.isEditor(tc))
+                    return true;
+            }
+            return false;            
+        } else {
+            // original implementation
+            return !isViewTopComponent( tc );
+        }
     }
     
     /**
@@ -157,12 +170,17 @@ public final class TopComponentTracker {
      * Returns false in all other cases.
      */
     public boolean isViewTopComponent( TopComponent tc ) {
-        if( tc.getPersistenceType() == TopComponent.PERSISTENCE_NEVER ) {
-            ModeImpl mode = ( ModeImpl ) WindowManagerImpl.getInstance().findMode( tc );
-            return null != mode && mode.getKind() != Constants.MODE_KIND_EDITOR;
+        if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
+            return !isEditorTopComponent(tc);
+        } else {
+            // original implementation
+            if( tc.getPersistenceType() == TopComponent.PERSISTENCE_NEVER ) {
+                ModeImpl mode = ( ModeImpl ) WindowManagerImpl.getInstance().findMode( tc );
+                return null != mode && mode.getKind() != Constants.MODE_KIND_EDITOR;
+            }
+            String id = WindowManagerImpl.getInstance().findTopComponentID( tc );
+            return id != null && viewIds.contains( id );            
         }
-        String id = WindowManagerImpl.getInstance().findTopComponentID( tc );
-        return id != null && viewIds.contains( id );
     }
 
     private Preferences getPreferences() {

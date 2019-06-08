@@ -417,7 +417,7 @@ final class ModesSubModel {
     public Set<ModeImpl> getModes() {
         return new HashSet<ModeImpl>(modes);
     }
-
+    
     public void setSplitWeights(NbWindowImpl window, ModelElement[] snapshots, double[] splitWeights) {
         editorSplitSubModel.get(window).setSplitWeights(snapshots, splitWeights);
     }

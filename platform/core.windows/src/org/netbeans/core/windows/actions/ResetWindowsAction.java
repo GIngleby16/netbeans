@@ -89,20 +89,26 @@ public class ResetWindowsAction implements ActionListener {
         
         wm.getMainWindow().setExtendedState( JFrame.NORMAL );
         
-        // close all NbWindows
-        for(NbWindow win: WindowManagerImpl.getInstance().getNbWindows()) {
-            WindowManagerImpl.getInstance().destroyNbWindow((NbWindowImpl)win);
-        }
 
         TopComponentGroupImpl projectTCGroup = (TopComponentGroupImpl) wm.findTopComponentGroup("OpenedProjects"); //NOI18N
         final boolean isProjectsTCGroupOpened = null != projectTCGroup && projectTCGroup.isOpened();
         
         //get a list of editor windows that should stay open even after the reset
         final TopComponent[] editors = collectEditors();
-        
+
+                
         //close all other windows just in case they hold some references to editor windows
         wm.closeNonEditorViews();
         
+        // hide all NbWindows
+//        for(NbWindow win: WindowManagerImpl.getInstance().getNbWindows()) {
+//            win.setVisible(false);
+//        }
+        // close all NbWindows
+        for(NbWindow win: WindowManagerImpl.getInstance().getNbWindows()) {
+            WindowManagerImpl.getInstance().destroyNbWindow((NbWindowImpl)win);
+        }
+
         //hide the main window to hide some window operations before the actual reset is performed
         wm.getMainWindow().setVisible( false );
         
@@ -162,6 +168,8 @@ public class ResetWindowsAction implements ActionListener {
                     //#210380 - do not call componentOpened on the editors 
                     registry.addTopComponent( editors[i] );
                 }
+
+
                 SwingUtilities.invokeLater( new Runnable() {
                     @Override
                     public void run() {
@@ -204,6 +212,8 @@ public class ResetWindowsAction implements ActionListener {
                 editors.add( tc );
             }
         }
+        
+        
         return editors.toArray( new TopComponent[editors.size()] );
     }
 }

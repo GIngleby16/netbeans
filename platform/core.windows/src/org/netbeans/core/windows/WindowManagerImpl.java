@@ -4,7 +4,7 @@
  * distributed with this work for additional information
  * regarding copyright ownership.  The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
+ * "License"); you may not u!se this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
@@ -1464,7 +1464,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
 
         if (Boolean.getBoolean("netbeans.winsys.enhanced")) {
             // if our enhanced dnd mode - check to see if the component is an editor using EditorSelectorService
-            return isEditor(tc);
+            return TopComponentTracker.getDefault().isEditorTopComponent(tc);
         } else {
             //check opened TopComponents first to avoid AWT assertion if possible
             for(ModeImpl mode: getModes()) {
@@ -2203,6 +2203,11 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
     }
 
     @Override
+    public boolean isEditor(TopComponent topComponent) {
+        return TopComponentTracker.getDefault().isEditorTopComponent(topComponent);
+    }
+
+    @Override
     public NbWindow findNbWindow(String name) {
         if(name == null || name.length() == 0)
             return null;
@@ -2215,15 +2220,5 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
         
         return null;
     }
-
-    @Override
-    public boolean isEditor(TopComponent tc) {
-        Collection<? extends EditorSelector> selectors = Lookup.getDefault().lookupAll(EditorSelector.class);
-        for (EditorSelector s : selectors) {
-            if(s.isEditor(tc))
-                return true;
-        }
-        return false;
-    }        
 }
 
