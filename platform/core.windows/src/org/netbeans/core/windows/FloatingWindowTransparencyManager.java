@@ -22,6 +22,7 @@ package org.netbeans.core.windows;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.SwingUtilities;
 import org.netbeans.core.windows.nativeaccess.NativeWindowSystem;
@@ -104,15 +105,17 @@ public class FloatingWindowTransparencyManager {
             return;
         
         if( WinSysPrefs.HANDLER.getBoolean( WinSysPrefs.TRANSPARENCY_FLOATING, false) ) {
+            System.out.println("toggle floating window transparancy");
             TopComponent currentActive = TopComponent.getRegistry().getActivated();
             if( null != currentActive ) {
                 final WindowManagerImpl wm = WindowManagerImpl.getInstance();
                 //turn off transparency for active floating window
                 ModeImpl currentActiveMode = (ModeImpl)wm.findMode( currentActive );
-                if( null != currentActiveMode 
-                        && currentActiveMode.getState() == Constants.MODE_STATE_SEPARATED
-                        && currentActiveMode.getKind() != Constants.MODE_KIND_EDITOR) {
-
+                NbWindowImpl window = WindowManagerImpl.getInstance().getWindowForMode(currentActiveMode);
+//                if( null != currentActiveMode 
+//                        && currentActiveMode.getState() == Constants.MODE_STATE_SEPARATED
+//                        && currentActiveMode.getKind() != Constants.MODE_KIND_EDITOR) {
+                if(window != null) { // if we are a floating window...
                     Window w = SwingUtilities.windowForComponent(currentActive);
                     if( null != w ) {
                         NativeWindowSystem.getDefault().setWindowAlpha( w, 1.0f );
@@ -143,11 +146,17 @@ public class FloatingWindowTransparencyManager {
     }
     
     private void turnTransparencyOff() {
+        System.out.println("turnTransparancy off");
         NativeWindowSystem nws = NativeWindowSystem.getDefault();
         for( ModeImpl m : WindowManagerImpl.getInstance().getModes() ) {
-            if( m.getState() != Constants.MODE_STATE_SEPARATED
-                    || m.getKind() == Constants.MODE_KIND_EDITOR )
+            // don't make main window transparent
+            NbWindowImpl win = WindowManagerImpl.getInstance().getWindowForMode(m);
+            if(win == null || !isValidTransparentWindow(win))
                 continue;
+            
+//            if( m.getState() != Constants.MODE_STATE_SEPARATED
+//                    || m.getKind() == Constants.MODE_KIND_EDITOR )
+//                continue;
             TopComponent tc = m.getSelectedTopComponent();
             if( null != tc ) {
                 Window w = SwingUtilities.windowForComponent(tc);
@@ -159,13 +168,18 @@ public class FloatingWindowTransparencyManager {
     }
 
     private void makeFloatingWindowsTransparent( ModeImpl activeMode ) {
+        System.out.println("makeFloatingWindowsTransparent");
         float alpha = WinSysPrefs.HANDLER.getFloat(WinSysPrefs.TRANSPARENCY_FLOATING_ALPHA, 0.5f);
         NativeWindowSystem nws = NativeWindowSystem.getDefault();
         for( ModeImpl m : WindowManagerImpl.getInstance().getModes() ) {
-            if( m.getState() != Constants.MODE_STATE_SEPARATED 
-                    || m.equals( activeMode )
-                    || m.getKind() == Constants.MODE_KIND_EDITOR )
+            // don't make main window transparent
+            NbWindowImpl win = WindowManagerImpl.getInstance().getWindowForMode(m);
+            if(win == null || m.equals(activeMode) || !isValidTransparentWindow(win))
                 continue;
+//            if( m.getState() != Constants.MODE_STATE_SEPARATED 
+//                    || m.equals( activeMode )
+//                    || m.getKind() == Constants.MODE_KIND_EDITOR )
+//                continue;
             TopComponent tc = m.getSelectedTopComponent();
             if( null != tc ) {
                 Window w = SwingUtilities.windowForComponent(tc);
@@ -175,5 +189,22 @@ public class FloatingWindowTransparencyManager {
             }
         }
 
+    }
+    
+    // a floating window can be transparent if it contains no editors
+    private boolean isValidTransparentWindow(NbWindowImpl window) {
+        WindowManagerImpl wm = WindowManagerImpl.getInstance();
+        Set<ModeImpl> modes = wm.getCentral().getModesForWindow(window);
+        boolean isValid = true;
+        for(ModeImpl m: modes) {
+            TopComponent[] open = wm.getOpenedTopComponents(m);
+            for(TopComponent tc: open) {
+                if(TopComponentTracker.getDefault().isEditorTopComponent(tc)) {
+                    isValid = false;
+                    break;
+                }
+            }
+        }
+        return isValid;
     }
 }

@@ -3521,6 +3521,10 @@ final class Central implements ControllerHandler {
         destroyNbWindow(window);
     }
 
+    public Set<ModeImpl> getModesForWindow(NbWindowImpl window) {
+        return model.getModesForWindow(window);
+    }
+    
     @Override
     public void destroyNbWindow(NbWindowImpl window) {
         // TODO gwi destroy-window: Need to correctly cleanup resouces when the window is closed
