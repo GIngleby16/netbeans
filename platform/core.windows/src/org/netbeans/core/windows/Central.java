@@ -3405,9 +3405,11 @@ final class Central implements ControllerHandler {
         for( ModeImpl m : model.getModes() ) {
             if( mode == m || m.getKind() != mode.getKind() || m.getState() != mode.getState() )
                 continue;
-            NbWindowImpl mWindow = WindowManagerImpl.getInstance().getWindowForMode(m);
-            if(mWindow != contextWindow)
-                continue;
+            if(Boolean.getBoolean("netbeans.winsys.enhanced")) {
+                NbWindowImpl mWindow = WindowManagerImpl.getInstance().getWindowForMode(m);
+                if(mWindow != contextWindow)
+                    continue;
+            }
             SplitConstraint[] otherSc = m.getConstraints();
             if( sameSplit( sc, otherSc) ) {
                 int otherIndex = otherSc[sc.length-1].index;

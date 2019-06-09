@@ -120,9 +120,11 @@ implements PropertyChangeListener {
         enable &= contextMode.getKind() == Constants.MODE_KIND_EDITOR;
         boolean hasOtherEditorMode = false;
         for( ModeImpl m : WindowManagerImpl.getInstance().getModes() ) {
-            NbWindowImpl mWindow = WindowManagerImpl.getInstance().getWindowForMode(m);
-            if(mWindow != contextWindow)
-                continue;
+            if(Boolean.getBoolean("netbeans.winsys.enhanced")) {
+                NbWindowImpl mWindow = WindowManagerImpl.getInstance().getWindowForMode(m);
+                if(mWindow != contextWindow)
+                    continue;
+            }
             if( m.getKind() == Constants.MODE_KIND_EDITOR && m.getState() == Constants.MODE_STATE_JOINED && m != contextMode ) {
                 hasOtherEditorMode = true;
                 break;
