@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFrame;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.NbWindowTracker;
 import org.netbeans.core.windows.WindowManagerImpl;
@@ -75,6 +76,7 @@ public class NbWindowFrame extends JFrame implements NbWindowComponent {
         
         // Automatically register with window tracker
         NbWindowTracker.getInstance().addWindow(window, this);
+        getRootPane().putClientProperty(Constants.SEPARATE_WINDOW_PROPERTY, Boolean.TRUE);        
 
 //        getRootPane().putClientProperty("isAuxFrame", Boolean.TRUE);
         // make minimize button visible in view tab

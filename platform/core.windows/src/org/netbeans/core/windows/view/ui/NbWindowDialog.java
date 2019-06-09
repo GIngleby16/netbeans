@@ -21,6 +21,7 @@ package org.netbeans.core.windows.view.ui;
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -28,17 +29,21 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JDialog;
+import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import org.netbeans.core.windows.Constants;
 import org.netbeans.core.windows.NbWindowImpl;
 import org.netbeans.core.windows.NbWindowTracker;
 import org.netbeans.core.windows.ModeImpl;
+import org.netbeans.core.windows.Switches;
 import org.netbeans.core.windows.WindowManagerImpl;
 import org.netbeans.core.windows.options.WinSysPrefs;
 import org.netbeans.core.windows.view.Controller;
@@ -95,6 +100,7 @@ public class NbWindowDialog extends JDialog implements NbWindowComponent {
         initFrameIcons(this);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
+        getRootPane().putClientProperty(Constants.SEPARATE_WINDOW_PROPERTY, Boolean.TRUE);        
         
         setTitle(WindowManager.getDefault().getMainWindow().getTitle());
 
@@ -202,4 +208,5 @@ public class NbWindowDialog extends JDialog implements NbWindowComponent {
     public Controller getController() {
         return controller;
     }
+
 }

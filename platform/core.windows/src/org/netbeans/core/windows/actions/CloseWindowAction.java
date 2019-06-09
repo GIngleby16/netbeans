@@ -72,6 +72,7 @@ implements PropertyChangeListener {
     
     /** Perform the action. Sets/unsets maximzed mode. */
     public void actionPerformed(java.awt.event.ActionEvent ev) {
+        System.out.println("Close Window Action");
         TopComponent topC = tc;
         if (topC == null) {
             // the updating instance will get the TC to close from winsys

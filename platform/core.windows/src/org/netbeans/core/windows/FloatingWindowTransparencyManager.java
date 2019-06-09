@@ -105,7 +105,6 @@ public class FloatingWindowTransparencyManager {
             return;
         
         if( WinSysPrefs.HANDLER.getBoolean( WinSysPrefs.TRANSPARENCY_FLOATING, false) ) {
-            System.out.println("toggle floating window transparancy");
             TopComponent currentActive = TopComponent.getRegistry().getActivated();
             if( null != currentActive ) {
                 final WindowManagerImpl wm = WindowManagerImpl.getInstance();
@@ -146,7 +145,6 @@ public class FloatingWindowTransparencyManager {
     }
     
     private void turnTransparencyOff() {
-        System.out.println("turnTransparancy off");
         NativeWindowSystem nws = NativeWindowSystem.getDefault();
         for( ModeImpl m : WindowManagerImpl.getInstance().getModes() ) {
             // don't make main window transparent
@@ -168,7 +166,6 @@ public class FloatingWindowTransparencyManager {
     }
 
     private void makeFloatingWindowsTransparent( ModeImpl activeMode ) {
-        System.out.println("makeFloatingWindowsTransparent");
         float alpha = WinSysPrefs.HANDLER.getFloat(WinSysPrefs.TRANSPARENCY_FLOATING_ALPHA, 0.5f);
         NativeWindowSystem nws = NativeWindowSystem.getDefault();
         for( ModeImpl m : WindowManagerImpl.getInstance().getModes() ) {
