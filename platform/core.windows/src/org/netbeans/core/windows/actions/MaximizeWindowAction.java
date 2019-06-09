@@ -105,7 +105,7 @@ public final class MaximizeWindowAction extends AbstractAction implements Presen
         
 //        System.out.println("CurrentTopComponent: " + curTC);
         
-        if(wm.isDocked(curTC)) {
+        if(wm.isDocked(curTC) || Boolean.getBoolean("netbeans.winsys.enhanced")) {
             // inside main window
             ModeImpl mode = (ModeImpl)wm.findMode(curTC);
             String tcID = wm.findTopComponentID( curTC );
