@@ -1354,6 +1354,7 @@ public final class WindowManagerImpl extends WindowManager implements Workspace 
                 if( !tc.isOpened() && null != recentTc )
                     mode.setSelectedTopComponent(recentTc);
             }
+            WindowManagerImpl.getInstance().getCentral().destroyNbWindowIfEmpty(window);            
         }
     }
     

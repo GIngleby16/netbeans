@@ -66,7 +66,7 @@ public final class NewTabGroupAction extends AbstractAction {
             return; //just being paranoid
         ModeImpl currentMode = ( ModeImpl ) wmi.findMode( contextTC );
         if( null == currentMode || currentMode.getKind() != Constants.MODE_KIND_EDITOR 
-                || !wmi.isDocked( contextTC ) )
+                /*|| !wmi.isDocked( contextTC )*/ )
             return;
         wmi.newTabGroup( contextTC );
     }
@@ -104,7 +104,7 @@ public final class NewTabGroupAction extends AbstractAction {
             if( res ) {
                 res &= mode.getKind() == Constants.MODE_KIND_EDITOR;
                 res &= mode.getOpenedTopComponents().size() > 1;
-                res &= wm.isDocked( context );
+                //res &= wm.isDocked( context );
             }
         }
         return res;

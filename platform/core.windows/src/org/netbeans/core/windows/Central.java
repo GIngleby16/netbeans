@@ -3361,9 +3361,9 @@ final class Central implements ControllerHandler {
         ModeImpl currentMode = ( ModeImpl ) WindowManagerImpl.getInstance().findMode( tc );
         if( null == currentMode ) 
             return;
-        ModeImpl newMode = attachModeToSide(null, currentMode, null, currentMode.getKind() );
+        NbWindowImpl window = getWindowForMode(currentMode);
+        ModeImpl newMode = attachModeToSide(window, currentMode, null, currentMode.getKind() );
         moveTopComponentIntoMode( newMode, tc );
-        NbWindowImpl window = getWindowForMode(newMode);
         updateViewAfterDnD(window, true , window);
         tc.requestActive();
         WindowManagerImpl.getInstance().doFirePropertyChange(
