@@ -58,36 +58,11 @@ public class DockingStatus {
             List<String> views = model.getModeOpenedTopComponentsIDs( modeImpl );
                         
             if( modeImpl.getKind() == Constants.MODE_KIND_VIEW ) {
-                for(String id: views) {
-                    if(docked.contains(id))
-                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
-                    else
-                        docked.add(id);
-                }
-                //docked.addAll( views );
-                for(String id: views) {
-                    if(docked.contains(id))
-                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
-                    else
-                        slided.remove(id);
-                }
-                //slided.removeAll( views );
+                docked.addAll( views );
+                slided.removeAll( views );
             } else if( modeImpl.getKind() == Constants.MODE_KIND_SLIDING ) {
-                for(String id: views) {
-                    if(docked.contains(id))
-                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
-                    else
-                        docked.remove(id);
-                }
-                for(String id: views) {
-                    if(docked.contains(id))
-                        System.out.println("WARNING TRYING TO ADD ID THAT EXISTS");
-                    else
-                        slided.add(id);
-                }
-
-//                docked.removeAll( views );
-//                slided.addAll( views );
+                docked.removeAll( views );
+                slided.addAll( views );
             }
         }
         marked = true;

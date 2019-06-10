@@ -278,7 +278,6 @@ final class ShortcutAndMenuKeyEventProcessor implements KeyEventDispatcher, KeyE
         if ((w instanceof Dialog) &&
             !WindowManagerImpl.isSeparateWindow(w) &&
             !isTransmodalAction(ks)) {
-            System.out.println("Aborting transaction from separate window");
             return false;
         }
         
