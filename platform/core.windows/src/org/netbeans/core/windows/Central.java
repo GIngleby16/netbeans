@@ -2718,7 +2718,11 @@ final class Central implements ControllerHandler {
         // if the top component is not showing, we'll compute the wrong size!
         TopComponent selectedTC = getModeSelectedTopComponent(mode);
         if(selectedTC != tc) {
-            tcSize = selectedTC.getSize();
+            try {
+                tcSize = selectedTC.getSize();
+            } catch(Throwable t) {
+                System.out.println("CAN'T DO THIS IF NOT VISIBLE");
+            }
         }
         
         SwingUtilities.convertPointToScreen(tcLoc, tc);
