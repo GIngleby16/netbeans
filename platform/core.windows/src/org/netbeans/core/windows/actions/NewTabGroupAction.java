@@ -66,7 +66,7 @@ public final class NewTabGroupAction extends AbstractAction {
             return; //just being paranoid
         ModeImpl currentMode = ( ModeImpl ) wmi.findMode( contextTC );
         if( null == currentMode || currentMode.getKind() != Constants.MODE_KIND_EDITOR 
-                || (!wmi.isDocked( contextTC ) || Boolean.getBoolean("netbeans.winsys.enhanced")) )
+                || (!wmi.isDocked( contextTC ) & !Boolean.getBoolean("netbeans.winsys.enhanced")) )
             return;
         wmi.newTabGroup( contextTC );
     }
