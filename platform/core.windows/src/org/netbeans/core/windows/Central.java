@@ -3484,8 +3484,9 @@ final class Central implements ControllerHandler {
             ModeImpl newMode5 = WindowManagerImpl.getInstance().createModeImpl(name + "_topSlidingSide", Constants.MODE_KIND_SLIDING, Constants.MODE_STATE_JOINED, true);
             model.addSlidingMode(window, newMode5, "top", null);
 //        }
-        
-        viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, null));
+       if(isVisible()) { 
+            viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, null));
+       }
     }
     
     public String getNbWindowName(NbWindowImpl window) {
@@ -3498,7 +3499,9 @@ final class Central implements ControllerHandler {
     
     public void setNbWindowBounds(NbWindowImpl window, Rectangle bounds) {
         model.setNbWindowBounds(window, bounds);
-        viewRequestor.scheduleRequest(new ViewRequest(window, View.CHANGE_NBWINDOW_BOUNDS_CHANGED, null, bounds));
+        if(isVisible()) {
+            viewRequestor.scheduleRequest(new ViewRequest(window, View.CHANGE_NBWINDOW_BOUNDS_CHANGED, null, bounds));
+        }
     }
     
     public boolean isNbWindowVisible(NbWindowImpl window) {
@@ -3507,7 +3510,9 @@ final class Central implements ControllerHandler {
     
     public void setNbWindowVisible(NbWindowImpl window, boolean visible) {
         model.setNbWindowVisible(window, visible);
-        viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, window));
+        if(isVisible()) {
+            viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_ADDED, null, window));
+        }
     }
 
     public void setNbWindowTitle(NbWindowImpl window, String title) {
@@ -3546,7 +3551,9 @@ final class Central implements ControllerHandler {
         }
 //        System.out.println("destroyNbWindow+model.removeNbWindow+CHANGE_NBWINDOW_REMOVED");
         model.removeNbWindow(window);        
-        viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_REMOVED, window, window));
+        if(isVisible()) {
+            viewRequestor.scheduleRequest(new ViewRequest(null, View.CHANGE_NBWINDOW_REMOVED, window, window));
+        }
     }
     
     

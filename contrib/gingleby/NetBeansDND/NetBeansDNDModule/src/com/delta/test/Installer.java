@@ -47,7 +47,7 @@ public class Installer extends ModuleInstall {
 //                // Open some real editors
 //                
                 try {
-                    File f = new File("U://LICENSE.txt");
+                    File f = new File("/Users/graeme/test.txt");
                     FileObject fo = FileUtil.toFileObject(f);
                     DataObject d = DataObject.find(fo);
                     EditorCookie ec = (EditorCookie)d.getCookie(EditorCookie.class);

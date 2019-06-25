@@ -16,12 +16,12 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 import org.openide.util.Lookup;
+import org.openide.windows.NbWindow;
 import org.openide.windows.WindowManager;
 
 /**
@@ -52,7 +52,16 @@ public class ZOrderPanel implements WMSpyPanel {
                 RootPaneContainer rpc = ref.get();
                 if(rpc != null) {
                     Window w = (Window)SwingUtilities.getAncestorOfClass(Window.class, rpc.getRootPane());
-                    lm.addElement(w.getName());
+                    
+                    String name = w.getName();    
+                    System.out.println("NAME=" + name);
+                    try {
+                        NbWindow nbWindow = WindowManager.getDefault().findNbWindow(name);
+                        if(nbWindow != null)
+                            lm.addElement(w.getName() + " " + w.getBounds().toString() + " " + nbWindow.getBounds().toString());
+                    } catch(Throwable tx) {
+                        lm.addElement(w.getName());
+                    }
                 }
             }
                     
